@@ -1,0 +1,49 @@
+{
+  "name": "get-thesis-done",
+  "version": "1.16.0",
+  "description": "A complete thesis-writing pipeline powered by multi-agent AI — canonical short context, adversarial academic review, and progressive summaries keep every chapter consistent.",
+  "bin": {
+    "get-thesis-done": "bin/install.js"
+  },
+  "files": [
+    "bin",
+    "commands",
+    "get-thesis-done",
+    "agents"
+  ],
+  "keywords": [
+    "thesis",
+    "latex",
+    "academic",
+    "abnt",
+    "ai",
+    "multi-agent",
+    "claude",
+    "claude-code",
+    "writing-pipeline",
+    "gemini",
+    "gemini-cli"
+  ],
+  "author": "TACHES",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rafaelzorzetti/get-thesis-done.git"
+  },
+  "homepage": "https://github.com/rafaelzorzetti/get-thesis-done",
+  "bugs": {
+    "url": "https://github.com/rafaelzorzetti/get-thesis-done/issues"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "esbuild": "^0.24.0"
+  },
+  "scripts": {
+    "build:hooks": "node scripts/build-hooks.js",
+    "prepublishOnly": "npm run build:hooks",
+    "test": "node --test get-thesis-done/bin/gtd-tools.test.js"
+  }
+}
