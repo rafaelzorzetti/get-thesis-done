@@ -12,8 +12,11 @@
  *   progress                     Report chapter statuses from .planning/chapters/
  *   context --chapter N          Assemble canonical context bundle for a chapter
  *   compile                      Compile LaTeX thesis via latexmk
+ *   cite-keys                    Extract and list citation keys from src/references.bib
+ *   sanitize --chapter N         Escape LaTeX special characters in chapter DRAFT.tex prose
+ *   validate-citations --chapter N  Cross-check \cite{} keys against references.bib
+ *   summary extract --chapter N  Create SUMMARY.md template in chapter directory
  *   framework                    (Coming in Phase 3)
- *   summary                      (Coming in Phase 3)
  */
 
 const fs = require('fs');
@@ -607,6 +610,10 @@ function cmdCompile(cwd, raw, clean) {
   // Ensure output directory exists
   fs.mkdirSync(outputDir, { recursive: true });
 
+  // --- Figure Pre-Processing Hook (Phase 5) ---
+  const figureResult = preProcessFigures(cwd);
+  // When Phase 5 implements this, check figureResult.errors
+
   // Run latexmk
   let stdout = '';
   let stderr = '';
@@ -658,6 +665,358 @@ function cmdCompile(cwd, raw, clean) {
   );
 }
 
+// --- Citation & Sanitization Commands ----------------------------------------
+
+/**
+ * Extract citation keys from .bib file content.
+ * Matches @type{key, patterns (e.g., @article{smith2020,).
+ * @param {string} bibContent - Raw .bib file content
+ * @returns {Set<string>} Set of citation keys
+ */
+function extractBibKeys(bibContent) {
+  const keys = new Set();
+  const pattern = /@\w+\{([^,\s]+)/g;
+  let match;
+  while ((match = pattern.exec(bibContent)) !== null) {
+    keys.add(match[1].trim());
+  }
+  return keys;
+}
+
+/**
+ * List all citation keys from src/references.bib, sorted alphabetically.
+ * @param {string} cwd - Current working directory
+ * @param {boolean} raw - Whether to output raw text
+ */
+function cmdCiteKeys(cwd, raw) {
+  const bibPath = path.join(cwd, 'src', 'references.bib');
+  const content = safeReadFile(bibPath);
+  if (!content) error('references.bib not found at src/references.bib');
+
+  const keys = extractBibKeys(content);
+  const sortedKeys = [...keys].sort();
+
+  output({
+    count: sortedKeys.length,
+    keys: sortedKeys,
+    bib_path: 'src/references.bib',
+  }, raw, sortedKeys.join('\n'));
+}
+
+/**
+ * Context-aware LaTeX sanitization.
+ * Escapes &, %, $, #, _ in prose text while preserving them inside
+ * LaTeX commands, math mode, and comments.
+ *
+ * Approach:
+ * 1. Identify protected zones (commands, math, comments)
+ * 2. Replace protected zones with null-byte placeholders
+ * 3. Escape special characters in remaining prose
+ * 4. Restore protected zones
+ *
+ * @param {string} content - Raw LaTeX content
+ * @returns {string} Sanitized content
+ */
+function sanitizeLatex(content) {
+  const protectedZones = [];
+  let placeholder = '\0';
+
+  // Collect protected zones in order of specificity
+  const patterns = [
+    /^%.*$/gm,                                         // % comment lines
+    /\$\$[\s\S]*?\$\$/g,                               // Display math $$...$$
+    /\$[^$\n]+\$/g,                                    // Inline math $...$
+    /\\\[[\s\S]*?\\\]/g,                               // Display math \[...\]
+    /\\[a-zA-Z]+\*?(?:\[[^\]]*\])*\{[^}]*\}/g,        // LaTeX commands with arguments
+    /\\[a-zA-Z]+\*?/g,                                 // Bare LaTeX commands
+  ];
+
+  let working = content;
+
+  for (const pat of patterns) {
+    working = working.replace(pat, (match) => {
+      const idx = protectedZones.length;
+      protectedZones.push(match);
+      return placeholder + idx + placeholder;
+    });
+  }
+
+  // Escape special characters in prose (only if not already escaped)
+  const escapes = [
+    [/(?<!\\)&/g, '\\&'],
+    [/(?<!\\)%/g, '\\%'],
+    [/(?<!\\)\$/g, '\\$'],
+    [/(?<!\\)#/g, '\\#'],
+    [/(?<!\\)_/g, '\\_'],
+  ];
+
+  for (const [pattern, replacement] of escapes) {
+    working = working.replace(pattern, replacement);
+  }
+
+  // Restore protected zones
+  for (let i = protectedZones.length - 1; i >= 0; i--) {
+    working = working.split(placeholder + i + placeholder).join(protectedZones[i]);
+  }
+
+  return working;
+}
+
+/**
+ * Count character-level differences between two strings.
+ * @param {string} a - Original string
+ * @param {string} b - Modified string
+ * @returns {number} Number of differing characters
+ */
+function countDifferences(a, b) {
+  let count = 0;
+  const maxLen = Math.max(a.length, b.length);
+  for (let i = 0; i < maxLen; i++) {
+    if (a[i] !== b[i]) count++;
+  }
+  return count;
+}
+
+/**
+ * Sanitize LaTeX special characters in a chapter's DRAFT.tex file.
+ * @param {string} cwd - Current working directory
+ * @param {string} chapter - Chapter number
+ * @param {boolean} raw - Whether to output raw text
+ */
+function cmdSanitize(cwd, chapter, raw) {
+  if (!chapter) error('--chapter required. Usage: sanitize --chapter N');
+
+  // Find the chapter directory
+  const chaptersDir = path.join(cwd, '.planning', 'chapters');
+  const padded = String(parseInt(chapter)).padStart(2, '0');
+
+  let entries;
+  try {
+    entries = fs.readdirSync(chaptersDir, { withFileTypes: true });
+  } catch {
+    error('No .planning/chapters/ directory found');
+  }
+
+  const chapterDir = entries.find(e => e.isDirectory() && e.name.startsWith(padded + '-'));
+  if (!chapterDir) error('No chapter directory found for chapter ' + chapter);
+
+  const dirPath = path.join(chaptersDir, chapterDir.name);
+  const files = fs.readdirSync(dirPath);
+  const draftFile = files.find(f => f.match(new RegExp(padded + '-01-DRAFT\\.tex$', 'i')));
+  if (!draftFile) error('No DRAFT.tex found in ' + dirPath);
+
+  const draftPath = path.join(dirPath, draftFile);
+  const original = fs.readFileSync(draftPath, 'utf-8');
+  const sanitized = sanitizeLatex(original);
+
+  const changesMade = original !== sanitized ? countDifferences(original, sanitized) : 0;
+
+  if (changesMade > 0) {
+    fs.writeFileSync(draftPath, sanitized, 'utf-8');
+  }
+
+  output({
+    chapter: parseInt(chapter),
+    file: draftPath,
+    changes_made: changesMade,
+    sanitized: changesMade > 0,
+  }, raw, changesMade > 0
+    ? 'Sanitized ' + draftFile + ': ' + changesMade + ' character(s) escaped'
+    : 'No changes needed in ' + draftFile
+  );
+}
+
+// --- Citation Validation & Summary Commands ----------------------------------
+
+/**
+ * Validate citation keys in LaTeX content against known .bib keys.
+ * Supports all biblatex citation commands: \cite, \textcite, \autocite,
+ * \parencite, \footcite, \cites, \Cite, \Textcite, plus starred variants
+ * and optional arguments.
+ *
+ * @param {string} texContent - LaTeX file content
+ * @param {Set<string>} validKeys - Set of valid .bib keys
+ * @returns {{ valid: string[], invalid: Array<{key: string, command: string, position: number}> }}
+ */
+function validateCitations(texContent, validKeys) {
+  const issues = [];
+  const valid = [];
+  // Match biblatex citation commands with optional args and key groups
+  const citePattern = /\\(?:[Tt]ext|[Aa]uto|[Pp]aren|[Ff]oot)?[Cc]ite[sp]?\*?(?:\[[^\]]*\])*\{([^}]+)\}/g;
+  let match;
+  while ((match = citePattern.exec(texContent)) !== null) {
+    const keysStr = match[1];
+    const citedKeys = keysStr.split(',').map(k => k.trim());
+    for (const key of citedKeys) {
+      if (validKeys.has(key)) {
+        valid.push(key);
+      } else {
+        issues.push({
+          key,
+          command: match[0],
+          position: match.index,
+        });
+      }
+    }
+  }
+  return { valid: [...new Set(valid)], invalid: issues };
+}
+
+/**
+ * Cross-check citations in a chapter DRAFT.tex against references.bib.
+ * @param {string} cwd - Current working directory
+ * @param {string} chapter - Chapter number
+ * @param {boolean} raw - Whether to output raw text
+ */
+function cmdValidateCitations(cwd, chapter, raw) {
+  if (!chapter) error('--chapter required. Usage: validate-citations --chapter N');
+
+  // Read .bib keys
+  const bibPath = path.join(cwd, 'src', 'references.bib');
+  const bibContent = safeReadFile(bibPath);
+  if (!bibContent) error('references.bib not found at src/references.bib');
+  const validKeys = extractBibKeys(bibContent);
+
+  // Find chapter DRAFT.tex
+  const chaptersDir = path.join(cwd, '.planning', 'chapters');
+  const padded = String(parseInt(chapter)).padStart(2, '0');
+
+  let entries;
+  try {
+    entries = fs.readdirSync(chaptersDir, { withFileTypes: true });
+  } catch {
+    error('No .planning/chapters/ directory found');
+  }
+
+  const chapterDir = entries.find(e => e.isDirectory() && e.name.startsWith(padded + '-'));
+  if (!chapterDir) error('No chapter directory found for chapter ' + chapter);
+
+  const dirPath = path.join(chaptersDir, chapterDir.name);
+  const files = fs.readdirSync(dirPath);
+  const draftFile = files.find(f => f.match(new RegExp(padded + '-01-DRAFT\\.tex$', 'i')));
+  if (!draftFile) error('No DRAFT.tex found. Write the chapter first: /gtd:write-chapter ' + chapter);
+
+  const texContent = fs.readFileSync(path.join(dirPath, draftFile), 'utf-8');
+  const result = validateCitations(texContent, validKeys);
+
+  output({
+    chapter: parseInt(chapter),
+    valid_count: result.valid.length,
+    invalid_count: result.invalid.length,
+    valid_keys: result.valid,
+    invalid_keys: result.invalid,
+    bib_keys_available: validKeys.size,
+  }, raw, result.invalid.length === 0
+    ? 'All ' + result.valid.length + ' citations valid against references.bib (' + validKeys.size + ' keys available)'
+    : result.invalid.length + ' invalid citation(s) found:\n' + result.invalid.map(i => '  - \\cite{' + i.key + '} not in references.bib').join('\n')
+  );
+}
+
+/**
+ * Create a SUMMARY.md template in the chapter directory.
+ * Does NOT overwrite existing SUMMARY.md files.
+ * @param {string} cwd - Current working directory
+ * @param {string} chapter - Chapter number
+ * @param {boolean} raw - Whether to output raw text
+ */
+function cmdSummaryExtract(cwd, chapter, raw) {
+  if (!chapter) error('--chapter required. Usage: summary extract --chapter N');
+
+  const chaptersDir = path.join(cwd, '.planning', 'chapters');
+  const padded = String(parseInt(chapter)).padStart(2, '0');
+
+  let entries;
+  try {
+    entries = fs.readdirSync(chaptersDir, { withFileTypes: true });
+  } catch {
+    error('No .planning/chapters/ directory found');
+  }
+
+  const chapterDir = entries.find(e => e.isDirectory() && e.name.startsWith(padded + '-'));
+  if (!chapterDir) error('No chapter directory found for chapter ' + chapter);
+
+  const dirPath = path.join(chaptersDir, chapterDir.name);
+  const summaryPath = path.join(dirPath, padded + '-01-SUMMARY.md');
+
+  // Do not overwrite existing summary
+  if (fs.existsSync(summaryPath)) {
+    output({
+      chapter: parseInt(chapter),
+      created: false,
+      reason: 'SUMMARY.md already exists',
+      path: summaryPath,
+    }, raw, 'SUMMARY.md already exists at ' + summaryPath);
+    return;
+  }
+
+  const template = [
+    '---',
+    'type: chapter-summary',
+    'chapter: ' + padded,
+    'status: template',
+    'created: ' + new Date().toISOString().split('T')[0],
+    '---',
+    '',
+    '# Chapter ' + padded + ' Summary',
+    '',
+    '## Key Arguments Made',
+    '',
+    '[To be filled by summary-writer agent after review approval]',
+    '',
+    '## Terms Introduced or Developed',
+    '',
+    '[Canonical terms from FRAMEWORK.md that were advanced in this chapter]',
+    '',
+    '## Threads Advanced',
+    '',
+    '[Continuity map threads that were pushed forward]',
+    '',
+    '## Methodological Contributions',
+    '',
+    '[Methods applied and their outputs]',
+    '',
+    '## Citations Used',
+    '',
+    '[Key citations referenced in this chapter]',
+    '',
+    '## Connections',
+    '',
+    '- **Built on:** [What was used from prior chapters]',
+    '- **Sets up:** [What future chapters can reference from this one]',
+    '',
+    '## Open Threads',
+    '',
+    '[Arguments or themes opened but not resolved -- for future chapters to address]',
+    '',
+  ].join('\n');
+
+  fs.writeFileSync(summaryPath, template, 'utf-8');
+
+  output({
+    chapter: parseInt(chapter),
+    created: true,
+    path: summaryPath,
+  }, raw, 'Created SUMMARY.md template at ' + summaryPath);
+}
+
+// --- Figure Pre-Processing Hook (Phase 5) ------------------------------------
+// Phase 5 will insert figure export pipeline here:
+// - Excalidraw -> PDF export
+// - Python scripts -> PNG/PDF generation
+// - Mermaid -> PNG/PDF conversion
+// TikZ figures compile inline (no pre-processing needed)
+
+/**
+ * Pre-process figures before LaTeX compilation.
+ * Currently a no-op hook -- Phase 5 implements this.
+ * @param {string} cwd - Current working directory
+ * @returns {{ processed: number, errors: string[] }}
+ */
+function preProcessFigures(cwd) {
+  // No-op: Phase 5 implements this
+  return { processed: 0, errors: [] };
+}
+
 // --- CLI Router --------------------------------------------------------------
 
 function main() {
@@ -670,7 +1029,7 @@ function main() {
   const cwd = process.cwd();
 
   if (!command) {
-    error('Usage: gtd-tools <command> [args] [--raw]\nCommands: init, progress, context, compile');
+    error('Usage: gtd-tools <command> [args] [--raw]\nCommands: init, progress, context, compile, cite-keys, sanitize, validate-citations, summary');
   }
 
   switch (command) {
@@ -700,18 +1059,41 @@ function main() {
       break;
     }
 
+    case 'cite-keys': {
+      cmdCiteKeys(cwd, raw);
+      break;
+    }
+
+    case 'sanitize': {
+      const chapterIdx = args.indexOf('--chapter');
+      cmdSanitize(cwd, chapterIdx !== -1 ? args[chapterIdx + 1] : null, raw);
+      break;
+    }
+
+    case 'validate-citations': {
+      const chapterIdx = args.indexOf('--chapter');
+      cmdValidateCitations(cwd, chapterIdx !== -1 ? args[chapterIdx + 1] : null, raw);
+      break;
+    }
+
+    case 'summary': {
+      const subcommand = args[1];
+      if (subcommand === 'extract') {
+        const chapterIdx = args.indexOf('--chapter');
+        cmdSummaryExtract(cwd, chapterIdx !== -1 ? args[chapterIdx + 1] : null, raw);
+      } else {
+        error('Usage: summary extract --chapter N');
+      }
+      break;
+    }
+
     case 'framework': {
       error('Framework update command coming in Phase 3. Use context --chapter N for now.');
       break;
     }
 
-    case 'summary': {
-      error('Summary extract command coming in Phase 3. Use context --chapter N for now.');
-      break;
-    }
-
     default: {
-      error('Unknown command: ' + command + '\nUsage: gtd-tools <command> [args] [--raw]\nCommands: init, progress, context, compile');
+      error('Unknown command: ' + command + '\nUsage: gtd-tools <command> [args] [--raw]\nCommands: init, progress, context, compile, cite-keys, sanitize, validate-citations, summary');
     }
   }
 }
