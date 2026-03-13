@@ -16,7 +16,7 @@
  *   sanitize --chapter N         Escape LaTeX special characters in chapter DRAFT.tex prose
  *   validate-citations --chapter N  Cross-check \cite{} keys against references.bib
  *   summary extract --chapter N  Create SUMMARY.md template in chapter directory
- *   framework                    (Coming in Phase 3)
+ *   framework update --chapter N  Update FRAMEWORK.md frontmatter/changelog after chapter review
  */
 
 const fs = require('fs');
@@ -1017,6 +1017,108 @@ function preProcessFigures(cwd) {
   return { processed: 0, errors: [] };
 }
 
+// --- Framework Update --------------------------------------------------------
+
+/**
+ * Update FRAMEWORK.md frontmatter and changelog after chapter completion.
+ * Creates a backup, updates updated_after/last_updated fields, and appends
+ * a placeholder changelog row.
+ * @param {string} cwd - Current working directory
+ * @param {string} chapter - Chapter number
+ * @param {boolean} raw - Raw output mode
+ */
+function cmdFrameworkUpdate(cwd, chapter, raw) {
+  if (!chapter) {
+    error('Usage: framework update --chapter N');
+  }
+
+  const chapterNum = parseInt(chapter, 10);
+  if (isNaN(chapterNum) || chapterNum < 1) {
+    error('Invalid chapter number: ' + chapter);
+  }
+
+  const padded = String(chapterNum).padStart(2, '0');
+  const frameworkPath = path.join(cwd, '.planning', 'FRAMEWORK.md');
+  const bakPath = path.join(cwd, '.planning', 'FRAMEWORK.md.bak');
+
+  // Read FRAMEWORK.md
+  const content = safeReadFile(frameworkPath);
+  if (!content) {
+    error('No FRAMEWORK.md found at ' + frameworkPath + '. Run /gtd:new-thesis first.');
+  }
+
+  // Create backup (always overwrite -- latest backup only)
+  fs.copyFileSync(frameworkPath, bakPath);
+
+  // Update frontmatter
+  const fm = extractFrontmatter(content);
+  const dateStr = new Date().toISOString().split('T')[0];
+  fm.updated_after = 'Ch ' + padded;
+  fm.last_updated = dateStr;
+  let updated = spliceFrontmatter(content, fm);
+
+  // Append changelog row
+  // Find the ## Changelog section and its table
+  const changelogMatch = updated.match(/## Changelog[\s\S]*?\n(\|[^\n]+\|)\n(\|[-| ]+\|)\n/);
+  if (changelogMatch) {
+    // Determine column count from header row
+    const headerRow = changelogMatch[1];
+    const colCount = (headerRow.match(/\|/g) || []).length - 1;
+
+    let newRow;
+    if (colCount === 3) {
+      newRow = `| Ch ${padded} | ${dateStr} | [Updated after chapter ${padded} completion -- review needed] |`;
+    } else {
+      // Safety: build row matching column count
+      const cells = [`Ch ${padded}`, dateStr, `[Updated after chapter ${padded} completion -- review needed]`];
+      while (cells.length < colCount) cells.push('');
+      newRow = '| ' + cells.join(' | ') + ' |';
+    }
+
+    // Find the end of the separator row and append the new row
+    const sepEnd = updated.indexOf(changelogMatch[2]) + changelogMatch[2].length;
+    // Check if there are existing data rows after the separator
+    const afterSep = updated.slice(sepEnd);
+    const nextNewline = afterSep.indexOf('\n');
+    if (nextNewline === -1) {
+      // No content after separator
+      updated = updated.slice(0, sepEnd) + '\n' + newRow + '\n';
+    } else {
+      // Find the last table row (last line starting with |)
+      const lines = updated.split('\n');
+      let lastTableRowIdx = -1;
+      let inChangelog = false;
+      for (let i = 0; i < lines.length; i++) {
+        if (lines[i].match(/^## Changelog/)) {
+          inChangelog = true;
+        } else if (inChangelog && lines[i].startsWith('|')) {
+          lastTableRowIdx = i;
+        } else if (inChangelog && !lines[i].startsWith('|') && lastTableRowIdx > 0) {
+          break;
+        }
+      }
+
+      if (lastTableRowIdx >= 0) {
+        lines.splice(lastTableRowIdx + 1, 0, newRow);
+        updated = lines.join('\n');
+      } else {
+        // Fallback: append after separator
+        updated = updated.slice(0, sepEnd) + '\n' + newRow + updated.slice(sepEnd);
+      }
+    }
+  }
+
+  // Write updated FRAMEWORK.md
+  fs.writeFileSync(frameworkPath, updated, 'utf-8');
+
+  output({
+    chapter: chapterNum,
+    backup: bakPath,
+    updated_after: 'Ch ' + padded,
+    last_updated: dateStr,
+  }, raw, 'Framework updated for chapter ' + chapter + '. Backup at ' + bakPath);
+}
+
 // --- CLI Router --------------------------------------------------------------
 
 function main() {
@@ -1029,7 +1131,7 @@ function main() {
   const cwd = process.cwd();
 
   if (!command) {
-    error('Usage: gtd-tools <command> [args] [--raw]\nCommands: init, progress, context, compile, cite-keys, sanitize, validate-citations, summary');
+    error('Usage: gtd-tools <command> [args] [--raw]\nCommands: init, progress, context, compile, cite-keys, sanitize, validate-citations, summary, framework');
   }
 
   switch (command) {
@@ -1088,12 +1190,18 @@ function main() {
     }
 
     case 'framework': {
-      error('Framework update command coming in Phase 3. Use context --chapter N for now.');
+      const sub = args[1];
+      if (sub === 'update') {
+        const chapterIdx = args.indexOf('--chapter');
+        cmdFrameworkUpdate(cwd, chapterIdx !== -1 ? args[chapterIdx + 1] : null, raw);
+      } else {
+        error('Usage: framework update --chapter N');
+      }
       break;
     }
 
     default: {
-      error('Unknown command: ' + command + '\nUsage: gtd-tools <command> [args] [--raw]\nCommands: init, progress, context, compile, cite-keys, sanitize, validate-citations, summary');
+      error('Unknown command: ' + command + '\nUsage: gtd-tools <command> [args] [--raw]\nCommands: init, progress, context, compile, cite-keys, sanitize, validate-citations, summary, framework');
     }
   }
 }
