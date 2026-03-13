@@ -3,7 +3,7 @@
 ## Project Reference
 
 **Core Value:** Academic rigor and consistency throughout the entire thesis -- every chapter coherent with the theoretical framework, every citation validated, formatting norms enforced automatically.
-**Current Focus:** Phase 1 execution. Templates created. Ready for Plan 01-03 (new-thesis workflow).
+**Current Focus:** Phase 1 execution. Core infra (01-01) and templates (01-02) done. Ready for Plan 01-03 (new-thesis workflow).
 
 ## Current Position
 
@@ -23,11 +23,12 @@ Phase 1: [##---] 2/3 plans complete
 |--------|-------|
 | Phases complete | 0/5 |
 | Plans complete | 2/? |
-| Requirements done | 10/43 |
+| Requirements done | 14/43 |
 | Session count | 2 |
 
 | Phase | Plan | Duration | Tasks | Files |
 |-------|------|----------|-------|-------|
+| 01 | 01 | 10m 6s | 2 | 3 |
 | 01 | 02 | 4m 46s | 2 | 9 |
 
 ## Accumulated Context
@@ -41,6 +42,10 @@ Phase 1: [##---] 2/3 plans complete
 - PDF metadata extraction (REF-03) kept in v1 but flagged as potentially deferrable if DOI covers 90% of cases
 - Python/Mermaid figures deferred to v2; v1 covers Excalidraw and TikZ only
 - Custom `{{PLACEHOLDER}}` template engine (LaTeX `{}` conflicts with standard engines)
+- ABNT norm auto-selected for pt-BR language, APA for en/es (01-01)
+- thesis.json stores language/level/norm/created in .planning/ (01-01)
+- Compile uses -bibtex-cond1 flag to conditionally invoke biber (01-01)
+- DRAFT.tex (not DRAFT.md) used for progress tracking in LaTeX thesis context (01-01)
 - biblatex-abnt uses noslsn and uniquename=init for proper ABNT author disambiguation (01-02)
 - abntex2-config.tex is optional import; main.tex works standalone without it (01-02)
 - Thesis STRUCTURE.md uses H3 chapters without Parts layer, unlike GWD books (01-02)
@@ -66,12 +71,12 @@ Phase 1: [##---] 2/3 plans complete
 
 ### Last Session
 - **Date:** 2026-03-13
-- **What happened:** Executed Plan 01-02: Created 9 template files (4 canonical document templates + 3 LaTeX templates + abntex2-config + requirements.txt). All adapted from GWD patterns for academic thesis context.
-- **Where we stopped:** Completed 01-02-PLAN.md. Ready for 01-03-PLAN.md (new-thesis workflow, /gtd:progress, /gtd:compile commands).
+- **What happened:** Executed Plan 01-01: Adapted package.json and install.js from GWD to GTD (systematic rename). Created gtd-tools.js CLI with init/progress/context/compile commands. Dual-track storage (.planning/ + src/) working.
+- **Where we stopped:** Completed 01-01-PLAN.md. Plans 01-01 and 01-02 done. Ready for 01-03-PLAN.md (commands and workflows).
 
 ### Next Session
 - Start with: `/gsd:execute-phase` for 01-03-PLAN.md
-- Context to load: 01-02-SUMMARY.md for template file locations, ROADMAP.md Phase 1 plan 3 details
+- Context to load: 01-01-SUMMARY.md for CLI capabilities, 01-02-SUMMARY.md for template file locations, ROADMAP.md Phase 1 plan 3 details
 
 ---
 *State initialized: 2026-03-13*

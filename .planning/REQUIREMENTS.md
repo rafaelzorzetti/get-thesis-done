@@ -9,8 +9,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Foundation
 
-- [ ] **FOUND-01**: System installs as npm package with `/gtd:*` commands for Claude Code
-- [ ] **FOUND-02**: `gtd-tools.js` CLI provides init, progress, context assembly, and compile commands
+- [x] **FOUND-01**: System installs as npm package with `/gtd:*` commands for Claude Code
+- [x] **FOUND-02**: `gtd-tools.js` CLI provides init, progress, context assembly, and compile commands
 - [x] **FOUND-03**: LaTeX template system supports abnTeX2 as default with custom university template override
 - [x] **FOUND-04**: Thesis language is configurable per project (PT-BR, EN, ES, etc.)
 - [x] **FOUND-05**: Package distributes via npm (commands) + pip requirements.txt (Python figure dependencies)
@@ -20,7 +20,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **INIT-01**: `/gtd:new-thesis` conducts deep questioning about topic, level, advisor, norms, language, structure
 - [x] **INIT-02**: System scaffolds FRAMEWORK.md, STYLE_GUIDE.md, STRUCTURE.md from templates based on author's answers
 - [x] **INIT-03**: System generates `main.tex` and chapter `.tex` stubs from LaTeX template
-- [ ] **INIT-04**: Thesis level (graduation/master's/PhD) is recorded and affects rigor expectations and review criteria
+- [x] **INIT-04**: Thesis level (graduation/master's/PhD) is recorded and affects rigor expectations and review criteria
 - [x] **INIT-05**: System creates `references.bib` and `references/` directory for PDFs
 - [x] **INIT-06**: System creates `figures/` directory structure and `FIGURES.md` catalog
 
@@ -29,7 +29,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **CANON-01**: FRAMEWORK.md tracks theoretical framework, glossary of technical terms, argumentative positions, and continuity map
 - [x] **CANON-02**: STYLE_GUIDE.md specifies academic voice, citation style rules (ABNT/APA), anti-patterns, and language calibration
 - [x] **CANON-03**: STRUCTURE.md defines thesis structure with chapter contracts, section dependencies, and arc tracking
-- [ ] **CANON-04**: Canonical documents serve as single source of truth for all agents via context assembly
+- [x] **CANON-04**: Canonical documents serve as single source of truth for all agents via context assembly
 
 ### Writing Pipeline
 

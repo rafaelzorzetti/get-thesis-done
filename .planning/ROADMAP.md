@@ -27,7 +27,7 @@
   5. `gtd-tools.js` CLI responds to init, progress, context, and compile subcommands
 **Plans:** 3 plans
 Plans:
-- [ ] 01-01-PLAN.md -- Package infrastructure (package.json, install.js) and gtd-tools.js CLI
+- [x] 01-01-PLAN.md -- Package infrastructure (package.json, install.js) and gtd-tools.js CLI
 - [x] 01-02-PLAN.md -- Canonical document templates and LaTeX templates
 - [ ] 01-03-PLAN.md -- /gtd:new-thesis workflow, /gtd:progress, and /gtd:compile commands
 
