@@ -468,7 +468,7 @@ function cmdProgress(cwd, raw) {
 function extractChapterStructure(structureContent, chapterNum) {
   const padded = String(chapterNum).padStart(2, '0');
   const pattern = new RegExp(
-    '(#### Chapter ' + padded + ':[\\s\\S]*?)(?=\\n####|\\n###|\\n##|$)'
+    '(### Chapter ' + padded + ':[\\s\\S]*?)(?=\\n### Chapter \\d|\\n## |$)'
   );
   const match = structureContent.match(pattern);
   return match ? match[1].trim() : null;
