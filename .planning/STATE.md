@@ -77,11 +77,11 @@ Phase 1: [#####] 3/3 plans complete
 ### Last Session
 - **Date:** 2026-03-13
 - **What happened:** Executed Plan 01-03: Created new-thesis workflow (385 lines, 7 steps, 12 questioning areas), /gtd:new-thesis command, /gtd:progress dashboard, and /gtd:compile with actionable error diagnostics. Phase 1 now complete.
-- **Where we stopped:** Completed 01-03-PLAN.md. All 3 Phase 1 plans done. Ready for Phase 2 planning.
+- **Where we stopped:** Phase 1 checkpoint approved by user. All 3 plans complete, all 15 requirements delivered.
 
 ### Next Session
-- Start with: Phase 2 planning (`/gsd:plan-phase` for Writing Pipeline & Compilation)
-- Context to load: Phase 1 summaries for all capabilities built, ROADMAP.md Phase 2 details, REQUIREMENTS.md for WRITE-* and COMP-* requirements
+- Start with: `/gsd:plan-phase 2` (Writing Pipeline & Compilation)
+- Context to load: Phase 1 summaries, ROADMAP.md Phase 2 details, REQUIREMENTS.md WRITE-* and COMP-* requirements
 
 ---
 *State initialized: 2026-03-13*
