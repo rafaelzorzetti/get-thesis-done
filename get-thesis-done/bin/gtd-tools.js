@@ -17,6 +17,11 @@
  *   validate-citations --chapter N  Cross-check \cite{} keys against references.bib
  *   summary extract --chapter N  Create SUMMARY.md template in chapter directory
  *   framework update --chapter N  Update FRAMEWORK.md frontmatter/changelog after chapter review
+ *   import-bib --file path.bib  Import entries from external .bib file (deduplicates by key)
+ *   fetch-doi --doi DOI          Fetch BibTeX from Crossref via DOI content negotiation
+ *   pdf-meta --file path.pdf    Extract DOI from PDF metadata and fetch BibTeX
+ *   validate-refs                Cross-chapter citation validation (missing/orphaned)
+ *   pdf-refs                     Cross-reference bib keys with PDFs in src/references/
  */
 
 const fs = require('fs');
@@ -1119,6 +1124,378 @@ function cmdFrameworkUpdate(cwd, chapter, raw) {
   }, raw, 'Framework updated for chapter ' + chapter + '. Backup at ' + bakPath);
 }
 
+// --- Reference Management Commands -------------------------------------------
+
+/**
+ * Extract complete BibTeX entries (not just keys) from .bib content.
+ * Returns array of { type, key, text } objects.
+ * Skips BibTeX special entries (comment, preamble, string).
+ * @param {string} bibContent - Raw .bib file content
+ * @returns {Array<{type: string, key: string, text: string}>}
+ */
+function extractBibEntries(bibContent) {
+  const entries = [];
+  const pattern = /@(\w+)\{([^,\s]+),/g;
+  let match;
+
+  while ((match = pattern.exec(bibContent)) !== null) {
+    const type = match[1].toLowerCase();
+    const key = match[2].trim();
+
+    // Skip BibTeX special entries
+    if (type === 'comment' || type === 'preamble' || type === 'string') continue;
+
+    // Track balanced braces to find entry end
+    const startIdx = match.index;
+    let braceCount = 0;
+    let endIdx = -1;
+    let foundOpen = false;
+
+    for (let i = startIdx; i < bibContent.length; i++) {
+      if (bibContent[i] === '{') {
+        braceCount++;
+        foundOpen = true;
+      } else if (bibContent[i] === '}') {
+        braceCount--;
+        if (foundOpen && braceCount === 0) {
+          endIdx = i + 1;
+          break;
+        }
+      }
+    }
+
+    if (endIdx > startIdx) {
+      entries.push({
+        type: match[1],  // preserve original case
+        key,
+        text: bibContent.slice(startIdx, endIdx),
+      });
+    }
+  }
+
+  return entries;
+}
+
+/**
+ * Safely append a BibTeX entry to a .bib file.
+ * Creates the file with a header comment if it does not exist.
+ * Ensures blank line separator before the new entry.
+ * @param {string} bibPath - Path to .bib file
+ * @param {string} entryText - Complete BibTeX entry text
+ */
+function appendBibEntry(bibPath, entryText) {
+  let existing = '';
+
+  if (fs.existsSync(bibPath)) {
+    existing = fs.readFileSync(bibPath, 'utf-8');
+  } else {
+    // Ensure parent directory exists
+    const parentDir = path.dirname(bibPath);
+    if (!fs.existsSync(parentDir)) {
+      fs.mkdirSync(parentDir, { recursive: true });
+    }
+    existing = '% References -- managed by get-thesis-done\n';
+  }
+
+  // Ensure blank line separator
+  if (existing.length > 0 && !existing.endsWith('\n\n')) {
+    if (!existing.endsWith('\n')) {
+      existing += '\n';
+    }
+    existing += '\n';
+  }
+
+  existing += entryText.trim() + '\n';
+  fs.writeFileSync(bibPath, existing, 'utf-8');
+
+  // Validate by re-reading and extracting keys
+  const verify = fs.readFileSync(bibPath, 'utf-8');
+  const keys = extractBibKeys(verify);
+  const entryKeys = extractBibKeys(entryText);
+  for (const k of entryKeys) {
+    if (!keys.has(k)) {
+      throw new Error('Failed to verify appended entry key: ' + k);
+    }
+  }
+}
+
+/**
+ * REF-01: Import entries from an external .bib file into src/references.bib.
+ * Deduplicates by citation key.
+ * @param {string} cwd - Current working directory
+ * @param {string} filePath - Path to external .bib file
+ * @param {boolean} raw - Whether to output raw text
+ */
+function cmdImportBib(cwd, filePath, raw) {
+  if (!filePath) error('--file required. Usage: import-bib --file path.bib');
+
+  // Resolve path relative to cwd if not absolute
+  const resolvedPath = path.isAbsolute(filePath) ? filePath : path.join(cwd, filePath);
+  const sourceContent = safeReadFile(resolvedPath);
+  if (sourceContent === null) error('File not found: ' + resolvedPath);
+
+  const bibPath = path.join(cwd, 'src', 'references.bib');
+
+  // Read existing keys
+  const existingContent = safeReadFile(bibPath) || '';
+  const existingKeys = extractBibKeys(existingContent);
+
+  // Extract entries from source
+  const sourceEntries = extractBibEntries(sourceContent);
+
+  const importedKeys = [];
+  const skippedKeys = [];
+
+  for (const entry of sourceEntries) {
+    if (existingKeys.has(entry.key)) {
+      skippedKeys.push(entry.key);
+    } else {
+      appendBibEntry(bibPath, entry.text);
+      existingKeys.add(entry.key);  // prevent duplicates within same import
+      importedKeys.push(entry.key);
+    }
+  }
+
+  output({
+    imported: importedKeys.length,
+    skipped: skippedKeys.length,
+    imported_keys: importedKeys,
+    skipped_keys: skippedKeys,
+    target: 'src/references.bib',
+  }, raw, `Imported ${importedKeys.length} entries, skipped ${skippedKeys.length} duplicates`);
+}
+
+/**
+ * REF-04: Cross-chapter citation validation.
+ * Scans both src/chapters/ and .planning/chapters/ for citations,
+ * reports missing and orphaned references.
+ * @param {string} cwd - Current working directory
+ * @param {boolean} raw - Whether to output raw text
+ */
+function cmdValidateRefs(cwd, raw) {
+  const bibPath = path.join(cwd, 'src', 'references.bib');
+  const bibContent = safeReadFile(bibPath);
+  if (!bibContent) error('references.bib not found at src/references.bib');
+
+  const validKeys = extractBibKeys(bibContent);
+  const allCitedKeys = new Set();
+  const perChapter = [];
+
+  // Helper to scan a directory of .tex files
+  function scanTexDir(dirPath, source) {
+    let entries;
+    try {
+      entries = fs.readdirSync(dirPath, { withFileTypes: true });
+    } catch {
+      return; // directory doesn't exist yet
+    }
+
+    if (source === 'approved') {
+      // Scan direct .tex files in src/chapters/
+      for (const entry of entries) {
+        if (!entry.isFile() || !entry.name.endsWith('.tex')) continue;
+        const texPath = path.join(dirPath, entry.name);
+        const content = fs.readFileSync(texPath, 'utf-8');
+        const result = validateCitations(content, validKeys);
+        result.valid.forEach(k => allCitedKeys.add(k));
+        result.invalid.forEach(i => allCitedKeys.add(i.key));
+        perChapter.push({
+          file: entry.name,
+          source,
+          valid_count: result.valid.length,
+          invalid_count: result.invalid.length,
+          invalid_keys: result.invalid.map(i => i.key),
+        });
+      }
+    } else {
+      // Scan .planning/chapters/*/  -- for each chapter dir, pick latest DRAFT
+      for (const entry of entries) {
+        if (!entry.isDirectory()) continue;
+        const chapterDirPath = path.join(dirPath, entry.name);
+        let chapterFiles;
+        try {
+          chapterFiles = fs.readdirSync(chapterDirPath);
+        } catch {
+          continue;
+        }
+
+        // Find DRAFT .tex files, prefer highest revision number
+        const draftFiles = chapterFiles
+          .filter(f => f.match(/DRAFT.*\.tex$/i))
+          .sort((a, b) => {
+            const aRev = a.match(/-r(\d+)\.tex$/i);
+            const bRev = b.match(/-r(\d+)\.tex$/i);
+            const aNum = aRev ? parseInt(aRev[1]) : 0;
+            const bNum = bRev ? parseInt(bRev[1]) : 0;
+            return bNum - aNum;  // highest first
+          });
+
+        if (draftFiles.length === 0) continue;
+
+        const latestDraft = draftFiles[0];
+        const texPath = path.join(chapterDirPath, latestDraft);
+        const content = fs.readFileSync(texPath, 'utf-8');
+        const result = validateCitations(content, validKeys);
+        result.valid.forEach(k => allCitedKeys.add(k));
+        result.invalid.forEach(i => allCitedKeys.add(i.key));
+        perChapter.push({
+          file: entry.name + '/' + latestDraft,
+          source,
+          valid_count: result.valid.length,
+          invalid_count: result.invalid.length,
+          invalid_keys: result.invalid.map(i => i.key),
+        });
+      }
+    }
+  }
+
+  // Scan both locations
+  scanTexDir(path.join(cwd, 'src', 'chapters'), 'approved');
+  scanTexDir(path.join(cwd, '.planning', 'chapters'), 'draft');
+
+  // Calculate aggregates
+  const missingFromBib = [];
+  for (const ch of perChapter) {
+    for (const k of ch.invalid_keys) {
+      if (!missingFromBib.includes(k)) missingFromBib.push(k);
+    }
+  }
+
+  const orphanedInBib = [];
+  for (const k of validKeys) {
+    if (!allCitedKeys.has(k)) {
+      orphanedInBib.push(k);
+    }
+  }
+
+  const resultData = {
+    total_bib_entries: validKeys.size,
+    total_cited_keys: allCitedKeys.size,
+    missing_from_bib: missingFromBib,
+    orphaned_in_bib: orphanedInBib,
+    per_chapter: perChapter,
+  };
+
+  // Build raw output
+  const lines = [];
+  lines.push('Reference Validation Report');
+  lines.push('==========================');
+  lines.push('');
+  lines.push('Bib entries: ' + validKeys.size);
+  lines.push('Cited keys:  ' + allCitedKeys.size);
+  lines.push('');
+
+  if (perChapter.length > 0) {
+    lines.push('Per-chapter breakdown:');
+    for (const ch of perChapter) {
+      const status = ch.invalid_count > 0 ? 'ISSUES' : 'OK';
+      lines.push('  ' + ch.file + ' (' + ch.source + '): ' + ch.valid_count + ' valid, ' + ch.invalid_count + ' invalid [' + status + ']');
+      if (ch.invalid_keys.length > 0) {
+        lines.push('    Missing: ' + ch.invalid_keys.join(', '));
+      }
+    }
+  } else {
+    lines.push('No chapters found to scan.');
+  }
+
+  lines.push('');
+  if (missingFromBib.length > 0) {
+    lines.push('Missing from bib (' + missingFromBib.length + '): ' + missingFromBib.join(', '));
+  } else {
+    lines.push('All cited keys found in references.bib.');
+  }
+
+  if (orphanedInBib.length > 0) {
+    lines.push('Orphaned in bib (' + orphanedInBib.length + '): ' + orphanedInBib.join(', '));
+  } else {
+    lines.push('No orphaned entries in references.bib.');
+  }
+
+  output(resultData, raw, lines.join('\n'));
+}
+
+/**
+ * REF-05: Cross-reference cited keys with PDFs in src/references/.
+ * Matches bib keys against PDF filenames (case-insensitive).
+ * @param {string} cwd - Current working directory
+ * @param {boolean} raw - Whether to output raw text
+ */
+function cmdPdfRefs(cwd, raw) {
+  const bibPath = path.join(cwd, 'src', 'references.bib');
+  const bibContent = safeReadFile(bibPath);
+  if (!bibContent) error('references.bib not found at src/references.bib');
+
+  const validKeys = extractBibKeys(bibContent);
+  const refsDir = path.join(cwd, 'src', 'references');
+
+  let pdfNames = [];
+  let dirNote = null;
+
+  if (fs.existsSync(refsDir)) {
+    try {
+      const files = fs.readdirSync(refsDir);
+      pdfNames = files.filter(f => f.toLowerCase().endsWith('.pdf'));
+    } catch {
+      pdfNames = [];
+    }
+  } else {
+    dirNote = 'src/references/ directory does not exist';
+  }
+
+  // Build lowercase PDF basename set for matching
+  const pdfBaseNames = new Set(pdfNames.map(f => f.replace(/\.pdf$/i, '').toLowerCase()));
+
+  const withPdfKeys = [];
+  const withoutPdfKeys = [];
+
+  for (const key of validKeys) {
+    if (pdfBaseNames.has(key.toLowerCase())) {
+      withPdfKeys.push(key);
+    } else {
+      withoutPdfKeys.push(key);
+    }
+  }
+
+  withPdfKeys.sort();
+  withoutPdfKeys.sort();
+
+  const resultData = {
+    total_entries: validKeys.size,
+    with_pdf: withPdfKeys.length,
+    without_pdf: withoutPdfKeys.length,
+    with_pdf_keys: withPdfKeys,
+    without_pdf_keys: withoutPdfKeys,
+  };
+  if (dirNote) resultData.note = dirNote;
+
+  // Build raw output
+  const lines = [];
+  lines.push('PDF Reference Report');
+  lines.push('====================');
+  lines.push('');
+  lines.push('Total bib entries: ' + validKeys.size);
+  lines.push('With PDF:          ' + withPdfKeys.length);
+  lines.push('Without PDF:       ' + withoutPdfKeys.length);
+  if (dirNote) lines.push('Note: ' + dirNote);
+  lines.push('');
+
+  if (withPdfKeys.length > 0) {
+    lines.push('Keys with PDF:');
+    for (const k of withPdfKeys) {
+      lines.push('  [x] ' + k);
+    }
+  }
+
+  if (withoutPdfKeys.length > 0) {
+    lines.push('Keys without PDF:');
+    for (const k of withoutPdfKeys) {
+      lines.push('  [ ] ' + k);
+    }
+  }
+
+  output(resultData, raw, lines.join('\n'));
+}
+
 // --- CLI Router --------------------------------------------------------------
 
 function main() {
@@ -1131,7 +1508,7 @@ function main() {
   const cwd = process.cwd();
 
   if (!command) {
-    error('Usage: gtd-tools <command> [args] [--raw]\nCommands: init, progress, context, compile, cite-keys, sanitize, validate-citations, summary, framework');
+    error('Usage: gtd-tools <command> [args] [--raw]\nCommands: init, progress, context, compile, cite-keys, sanitize, validate-citations, summary, framework, import-bib, fetch-doi, pdf-meta, validate-refs, pdf-refs');
   }
 
   switch (command) {
@@ -1200,8 +1577,24 @@ function main() {
       break;
     }
 
+    case 'import-bib': {
+      const fileIdx = args.indexOf('--file');
+      cmdImportBib(cwd, fileIdx !== -1 ? args[fileIdx + 1] : null, raw);
+      break;
+    }
+
+    case 'validate-refs': {
+      cmdValidateRefs(cwd, raw);
+      break;
+    }
+
+    case 'pdf-refs': {
+      cmdPdfRefs(cwd, raw);
+      break;
+    }
+
     default: {
-      error('Unknown command: ' + command + '\nUsage: gtd-tools <command> [args] [--raw]\nCommands: init, progress, context, compile, cite-keys, sanitize, validate-citations, summary, framework');
+      error('Unknown command: ' + command + '\nUsage: gtd-tools <command> [args] [--raw]\nCommands: init, progress, context, compile, cite-keys, sanitize, validate-citations, summary, framework, import-bib, fetch-doi, pdf-meta, validate-refs, pdf-refs');
     }
   }
 }
