@@ -41,7 +41,11 @@ Plans:
   3. User runs `/gtd:write-chapter N` and gets a LaTeX chapter file produced through Wave 1 (structural draft) and Wave 2 (polished prose), with proper `\chapter{}`, `\section{}`, `\cite{}`, and figure/table environments
   4. User runs `/gtd:compile` and gets a compiled PDF, with actionable error diagnostics (not raw LaTeX log) and LaTeX special character sanitization applied automatically
   5. User runs `/gtd:progress` and sees a dashboard showing chapter statuses and the next recommended action
-**Plans**: TBD
+**Plans:** 3 plans
+Plans:
+- [ ] 02-01-PLAN.md -- Agent adaptations (planner.md + writer.md for thesis/LaTeX) and extractChapterStructure() regex fix
+- [ ] 02-02-PLAN.md -- Workflows and commands (discuss-chapter, plan-chapter, write-chapter)
+- [ ] 02-03-PLAN.md -- CLI extensions (sanitize, cite-keys, validate-citations, summary extract) and compilation figure hook
 
 ### Phase 3: Academic Review & Continuity
 **Goal**: Each chapter passes a rigorous 4-category academic review, and approved chapters automatically update canonical documents to maintain cross-chapter coherence throughout the thesis
@@ -82,11 +86,11 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation & Initialization | 3/3 | Complete | 2026-03-13 |
-| 2. Writing Pipeline & Compilation | 0/? | Not started | - |
+| 2. Writing Pipeline & Compilation | 0/3 | Planning complete | - |
 | 3. Academic Review & Continuity | 0/? | Not started | - |
 | 4. Reference Management | 0/? | Not started | - |
 | 5. Figure Management | 0/? | Not started | - |
 
 ---
 *Roadmap created: 2026-03-13*
-*Last updated: 2026-03-13 after 01-03 execution*
+*Last updated: 2026-03-13 after Phase 2 planning*
