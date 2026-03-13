@@ -8,7 +8,7 @@
 ## Phases
 
 - [x] **Phase 1: Foundation & Initialization** - Installable package that scaffolds a compilable, empty ABNT-compliant LaTeX thesis with canonical documents
-- [ ] **Phase 2: Writing Pipeline & Compilation** - Plan chapters, generate LaTeX drafts in two waves, and compile to PDF
+- [x] **Phase 2: Writing Pipeline & Compilation** - Plan chapters, generate LaTeX drafts in two waves, and compile to PDF
 - [ ] **Phase 3: Academic Review & Continuity** - Adversarial 4-category review with continuity loop for cross-chapter coherence
 - [ ] **Phase 4: Reference Management** - Import, fetch, and validate references from .bib, DOI, and PDF sources
 - [ ] **Phase 5: Figure Management** - Create, catalog, and validate figures with pre-compilation export pipeline
@@ -45,7 +45,7 @@ Plans:
 Plans:
 - [x] 02-01-PLAN.md -- Agent adaptations (planner.md + writer.md for thesis/LaTeX) and extractChapterStructure() regex fix
 - [ ] 02-02-PLAN.md -- Workflows and commands (discuss-chapter, plan-chapter, write-chapter)
-- [ ] 02-03-PLAN.md -- CLI extensions (sanitize, cite-keys, validate-citations, summary extract) and compilation figure hook
+- [x] 02-03-PLAN.md -- CLI extensions (sanitize, cite-keys, validate-citations, summary extract) and compilation figure hook
 
 ### Phase 3: Academic Review & Continuity
 **Goal**: Each chapter passes a rigorous 4-category academic review, and approved chapters automatically update canonical documents to maintain cross-chapter coherence throughout the thesis
@@ -86,11 +86,11 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation & Initialization | 3/3 | Complete | 2026-03-13 |
-| 2. Writing Pipeline & Compilation | 1/3 | In progress | - |
+| 2. Writing Pipeline & Compilation | 3/3 | Complete | 2026-03-13 |
 | 3. Academic Review & Continuity | 0/? | Not started | - |
 | 4. Reference Management | 0/? | Not started | - |
 | 5. Figure Management | 0/? | Not started | - |
 
 ---
 *Roadmap created: 2026-03-13*
-*Last updated: 2026-03-13 after 02-01 execution*
+*Last updated: 2026-03-13 after 02-03 execution*

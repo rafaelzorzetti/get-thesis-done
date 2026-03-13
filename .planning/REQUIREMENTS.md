@@ -70,9 +70,9 @@ Requirements for initial release. Each maps to roadmap phases.
 ### Compilation
 
 - [ ] **COMP-01**: `/gtd:compile` runs latexmk with pdflatex + biber for multi-pass compilation
-- [ ] **COMP-02**: Compilation pre-processes figure pipeline (Excalidraw export) before LaTeX build
+- [x] **COMP-02**: Compilation pre-processes figure pipeline (Excalidraw export) before LaTeX build
 - [ ] **COMP-03**: Compilation reports errors with actionable diagnostics (not raw LaTeX log)
-- [ ] **COMP-04**: LaTeX special character sanitization catches common unescaped characters (`_`, `%`, `&`)
+- [x] **COMP-04**: LaTeX special character sanitization catches common unescaped characters (`_`, `%`, `&`)
 
 ## v2 Requirements
 
@@ -141,9 +141,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | WRITE-06 | Phase 2 | Complete |
 | WRITE-07 | Phase 2 | Pending |
 | COMP-01 | Phase 2 | Pending |
-| COMP-02 | Phase 2 | Pending |
+| COMP-02 | Phase 2 | Complete |
 | COMP-03 | Phase 2 | Pending |
-| COMP-04 | Phase 2 | Pending |
+| COMP-04 | Phase 2 | Complete |
 | REVIEW-01 | Phase 3 | Pending |
 | REVIEW-02 | Phase 3 | Pending |
 | REVIEW-03 | Phase 3 | Pending |
@@ -169,4 +169,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-03-13*
-*Last updated: 2026-03-13 after 02-01 execution*
+*Last updated: 2026-03-13 after 02-03 execution*
