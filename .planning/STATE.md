@@ -3,28 +3,28 @@
 ## Project Reference
 
 **Core Value:** Academic rigor and consistency throughout the entire thesis -- every chapter coherent with the theoretical framework, every citation validated, formatting norms enforced automatically.
-**Current Focus:** Phase 3 in progress. Plan 03-01 complete (agent adaptations). Plan 03-02 next (workflows, command, CLI).
+**Current Focus:** Phase 3 complete. All 2 plans done (agents, workflows, command, CLI). Phase 4 next (Reference Management).
 
 ## Current Position
 
 **Milestone:** v1
 **Phase:** 3 - Academic Review & Continuity
-**Plan:** 03-01 complete
-**Status:** Phase 3 in progress
+**Plan:** 03-02 complete
+**Status:** Phase 3 complete
 
 ```
-[##---] 40% (2/5 phases complete)
-Phase 3: [##--] 1/2 plans complete
+[###--] 60% (3/5 phases complete)
+Phase 3: [####] 2/2 plans complete
 ```
 
 ## Performance Metrics
 
 | Metric | Value |
 |--------|-------|
-| Phases complete | 2/5 |
-| Plans complete | 8/? |
-| Requirements done | 25/43 |
-| Session count | 6 |
+| Phases complete | 3/5 |
+| Plans complete | 9/? |
+| Requirements done | 27/43 |
+| Session count | 7 |
 
 | Phase | Plan | Duration | Tasks | Files |
 |-------|------|----------|-------|-------|
@@ -35,6 +35,7 @@ Phase 3: [##--] 1/2 plans complete
 | 02 | 02 | 5m 36s | 2 | 6 |
 | 02 | 03 | 3m 1s | 2 | 1 |
 | 03 | 01 | 9m 39s | 2 | 3 |
+| 03 | 02 | 6m 37s | 2 | 4 |
 
 ## Accumulated Context
 
@@ -75,6 +76,13 @@ Phase 3: [##--] 1/2 plans complete
 - Summary-writer fills 7 thesis sections matching gtd-tools.js summary template, removing Metaphors Active and Emotional Arc (03-01)
 - Terminology table retains old terms in 'NOT This' column as intentional negative examples (same pattern as Phase 2) (03-01)
 - Category identifiers use snake_case in REVIEW.md frontmatter (03-01)
+- Review workflow enforces max 2 revision cycles with forced author decision after (approve, edit, or rewrite) (03-02)
+- Continuity-loop runs framework-keeper FIRST then summary-writer SECOND in strict sequential order (03-02)
+- CLI framework update creates backup via copyFileSync, updates frontmatter, appends changelog row before framework-keeper agent runs (03-02)
+- /gtd:review-chapter command chains review-chapter workflow then continuity-loop on approval (03-02)
+- Terminology tables retain old terms in NOT This column as intentional negative examples across all agents/workflows (03-02)
+- All draft paths use .tex extension: DRAFT.tex, DRAFT-r1.tex, DRAFT-r2.tex (LaTeX-native pipeline) (03-02)
+- Direct git add/commit in review and continuity workflows (same Phase 2 decision -- no phantom CLI wrapper) (03-02)
 
 ### Research Flags
 - Phase 5 (Figure Pipeline): Excalidraw export tooling at MEDIUM confidence -- validate excalidraw-brute-export-cli reliability on WSL2/Linux before building around it
@@ -96,13 +104,13 @@ Phase 3: [##--] 1/2 plans complete
 
 ### Last Session
 - **Date:** 2026-03-13
-- **What happened:** Executed Phase 3 Plan 03-01 (agent adaptations, 9m39s). Rewrote reviewer.md with 4 thesis categories, created framework-keeper.md from bible-keeper.md, adapted summary-writer.md for 7 thesis sections. All 18 verification checks pass.
-- **Where we stopped:** Completed 03-01-PLAN.md. Phase 3 Plan 03-02 next (workflows, command, CLI framework update).
+- **What happened:** Executed Phase 3 Plan 03-02 (workflows, command, CLI, 6m37s). Created review-chapter workflow (577 lines) with 2-cycle revision cap, continuity-loop workflow (447 lines) with strict framework-keeper-then-summary-writer ordering, /gtd:review-chapter command chaining both, and cmdFrameworkUpdate CLI creating backup/updating frontmatter/appending changelog. All 17 verification checks pass. Phase 3 complete.
+- **Where we stopped:** Completed 03-02-PLAN.md. Phase 3 fully complete (2/2 plans). Phase 4 (Reference Management) next.
 
 ### Next Session
-- Start with: Execute 03-02-PLAN.md (workflows, command, CLI)
-- Context to load: 03-01-SUMMARY.md (agent outputs), 03-RESEARCH.md (workflow architecture patterns), REQUIREMENTS.md REVIEW-* requirements
+- Start with: Phase 4 planning (Reference Management -- import, fetch, validate references)
+- Context to load: REQUIREMENTS.md REF-* requirements, ROADMAP.md Phase 4 details
 
 ---
 *State initialized: 2026-03-13*
-*Last updated: 2026-03-13 after Phase 3 Plan 01 execution*
+*Last updated: 2026-03-13 after Phase 3 Plan 02 execution*

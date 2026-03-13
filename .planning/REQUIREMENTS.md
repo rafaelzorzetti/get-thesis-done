@@ -48,8 +48,8 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **REVIEW-03**: Reviewer checks methodological rigor — consistency with methodology chapter, appropriate methods for claims
 - [ ] **REVIEW-04**: Reviewer checks argumentative coherence — logical continuity across chapters, theoretical framework respected
 - [ ] **REVIEW-05**: Reviewer checks formatting norms — ABNT/APA compliance, LaTeX structure, margins, spacing
-- [ ] **REVIEW-06**: Review supports up to 2 revision cycles before forcing author decision
-- [ ] **REVIEW-07**: Approved chapters trigger continuity loop — framework-keeper updates FRAMEWORK.md, summary-writer fills SUMMARY.md
+- [x] **REVIEW-06**: Review supports up to 2 revision cycles before forcing author decision
+- [x] **REVIEW-07**: Approved chapters trigger continuity loop — framework-keeper updates FRAMEWORK.md, summary-writer fills SUMMARY.md
 
 ### Reference Management
 
@@ -149,8 +149,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | REVIEW-03 | Phase 3 | Pending |
 | REVIEW-04 | Phase 3 | Pending |
 | REVIEW-05 | Phase 3 | Pending |
-| REVIEW-06 | Phase 3 | Pending |
-| REVIEW-07 | Phase 3 | Pending |
+| REVIEW-06 | Phase 3 | Complete |
+| REVIEW-07 | Phase 3 | Complete |
 | REF-01 | Phase 4 | Pending |
 | REF-02 | Phase 4 | Pending |
 | REF-03 | Phase 4 | Pending |
