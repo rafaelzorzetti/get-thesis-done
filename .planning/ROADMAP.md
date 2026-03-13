@@ -56,7 +56,10 @@ Plans:
   2. Every `\cite{}` in a reviewed chapter is validated against references.bib -- missing or invalid citations are flagged
   3. After up to 2 revision cycles, the user is forced to make a final decision (approve or defer)
   4. When a chapter is approved, FRAMEWORK.md is automatically updated (glossary, positions, continuity map) and SUMMARY.md is generated for the inter-chapter context chain
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 03-01-PLAN.md -- Agent adaptations (reviewer.md with 4 thesis categories, framework-keeper.md, summary-writer.md)
+- [ ] 03-02-PLAN.md -- Workflows, command, and CLI (review-chapter + continuity-loop workflows, /gtd:review-chapter command, framework update CLI)
 
 ### Phase 4: Reference Management
 **Goal**: Users can build and maintain their references.bib from multiple sources, with validation ensuring every citation in the thesis resolves to a real entry
@@ -87,10 +90,10 @@ Plans:
 |-------|----------------|--------|-----------|
 | 1. Foundation & Initialization | 3/3 | Complete | 2026-03-13 |
 | 2. Writing Pipeline & Compilation | 3/3 | Complete | 2026-03-13 |
-| 3. Academic Review & Continuity | 0/? | Not started | - |
+| 3. Academic Review & Continuity | 0/2 | Planned | - |
 | 4. Reference Management | 0/? | Not started | - |
 | 5. Figure Management | 0/? | Not started | - |
 
 ---
 *Roadmap created: 2026-03-13*
-*Last updated: 2026-03-13 after Phase 2 execution*
+*Last updated: 2026-03-13 after Phase 3 planning*
