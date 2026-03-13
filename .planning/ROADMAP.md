@@ -43,7 +43,7 @@ Plans:
   5. User runs `/gtd:progress` and sees a dashboard showing chapter statuses and the next recommended action
 **Plans:** 3 plans
 Plans:
-- [ ] 02-01-PLAN.md -- Agent adaptations (planner.md + writer.md for thesis/LaTeX) and extractChapterStructure() regex fix
+- [x] 02-01-PLAN.md -- Agent adaptations (planner.md + writer.md for thesis/LaTeX) and extractChapterStructure() regex fix
 - [ ] 02-02-PLAN.md -- Workflows and commands (discuss-chapter, plan-chapter, write-chapter)
 - [ ] 02-03-PLAN.md -- CLI extensions (sanitize, cite-keys, validate-citations, summary extract) and compilation figure hook
 
@@ -86,11 +86,11 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation & Initialization | 3/3 | Complete | 2026-03-13 |
-| 2. Writing Pipeline & Compilation | 0/3 | Planning complete | - |
+| 2. Writing Pipeline & Compilation | 1/3 | In progress | - |
 | 3. Academic Review & Continuity | 0/? | Not started | - |
 | 4. Reference Management | 0/? | Not started | - |
 | 5. Figure Management | 0/? | Not started | - |
 
 ---
 *Roadmap created: 2026-03-13*
-*Last updated: 2026-03-13 after Phase 2 planning*
+*Last updated: 2026-03-13 after 02-01 execution*

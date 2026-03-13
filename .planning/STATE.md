@@ -3,18 +3,18 @@
 ## Project Reference
 
 **Core Value:** Academic rigor and consistency throughout the entire thesis -- every chapter coherent with the theoretical framework, every citation validated, formatting norms enforced automatically.
-**Current Focus:** Phase 1 complete (all 3 plans done). Ready for Phase 2 planning.
+**Current Focus:** Phase 2 in progress. Plan 02-01 complete (agent adaptations). Next: Plan 02-02 (workflows and commands).
 
 ## Current Position
 
 **Milestone:** v1
-**Phase:** 1 - Foundation & Initialization (complete)
-**Plan:** 01-03 complete, Phase 1 done
-**Status:** Phase 1 complete, ready for Phase 2 planning
+**Phase:** 2 - Writing Pipeline & Compilation
+**Plan:** 02-01 complete, next 02-02
+**Status:** Phase 2 in progress
 
 ```
 [#----] 20% (1/5 phases complete)
-Phase 1: [#####] 3/3 plans complete
+Phase 2: [#---] 1/3 plans complete
 ```
 
 ## Performance Metrics
@@ -22,15 +22,16 @@ Phase 1: [#####] 3/3 plans complete
 | Metric | Value |
 |--------|-------|
 | Phases complete | 1/5 |
-| Plans complete | 3/? |
-| Requirements done | 16/43 |
-| Session count | 3 |
+| Plans complete | 4/? |
+| Requirements done | 20/43 |
+| Session count | 4 |
 
 | Phase | Plan | Duration | Tasks | Files |
 |-------|------|----------|-------|-------|
 | 01 | 01 | 10m 6s | 2 | 3 |
 | 01 | 02 | 4m 46s | 2 | 9 |
 | 01 | 03 | 4m 27s | 2 | 4 |
+| 02 | 01 | 5m 49s | 2 | 3 |
 
 ## Accumulated Context
 
@@ -55,6 +56,9 @@ Phase 1: [#####] 3/3 plans complete
 - Compilation verification added to initialization workflow (not in GWD) to catch LaTeX setup issues early (01-03)
 - Deep questioning covers 12 academic areas vs GWD's 6 general areas (01-03)
 - Compile command includes 7 common LaTeX error patterns with actionable fix suggestions (01-03)
+- Planner terminology table retains old terms in 'NOT This' column as intentional negative examples (02-01)
+- Writer anti-patterns adapted for academic context: Hedge->Weak Hedge, Balance->False Balance, Teacher->Textbook (02-01)
+- extractChapterStructure() lookahead changed to '### Chapter \d' for precise chapter boundary matching (02-01)
 
 ### Research Flags
 - Phase 5 (Figure Pipeline): Excalidraw export tooling at MEDIUM confidence -- validate excalidraw-brute-export-cli reliability on WSL2/Linux before building around it
@@ -76,12 +80,12 @@ Phase 1: [#####] 3/3 plans complete
 
 ### Last Session
 - **Date:** 2026-03-13
-- **What happened:** Executed Plan 01-03: Created new-thesis workflow (385 lines, 7 steps, 12 questioning areas), /gtd:new-thesis command, /gtd:progress dashboard, and /gtd:compile with actionable error diagnostics. Phase 1 now complete.
-- **Where we stopped:** Phase 1 checkpoint approved by user. All 3 plans complete, all 15 requirements delivered.
+- **What happened:** Executed Plan 02-01: Rewrote agents/planner.md with thesis-native terminology, planned citations, methodology tracking, and methodological arc position. Rewrote agents/writer.md with LaTeX output, academic persona, and adapted anti-patterns. Fixed extractChapterStructure() regex from H4 to H3.
+- **Where we stopped:** Completed 02-01-PLAN.md. Ready for 02-02-PLAN.md (workflows and commands).
 
 ### Next Session
-- Start with: `/gsd:plan-phase 2` (Writing Pipeline & Compilation)
-- Context to load: Phase 1 summaries, ROADMAP.md Phase 2 details, REQUIREMENTS.md WRITE-* and COMP-* requirements
+- Start with: Execute 02-02-PLAN.md (Workflows and commands: discuss-chapter, plan-chapter, write-chapter)
+- Context to load: 02-01-SUMMARY.md, adapted agent files, ROADMAP.md Phase 2 details
 
 ---
 *State initialized: 2026-03-13*
