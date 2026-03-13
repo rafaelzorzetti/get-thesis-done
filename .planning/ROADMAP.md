@@ -71,7 +71,10 @@ Plans:
   3. User runs `/gtd:add-reference` with a PDF file and the system extracts metadata to generate a .bib entry
   4. Reference-manager validates all `\cite{}` keys across all chapters against references.bib and reports mismatches
   5. System reports which cited references have corresponding PDFs in the `references/` directory and which do not
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 04-01-PLAN.md -- CLI extensions (import-bib, fetch-doi, pdf-meta, validate-refs, pdf-refs) and reference-manager agent
+- [ ] 04-02-PLAN.md -- add-reference workflow and /gtd:add-reference command
 
 ### Phase 5: Figure Management
 **Goal**: Users can create, catalog, and manage thesis figures with automatic reference validation, and the compilation pipeline pre-processes figure exports before building the PDF
@@ -91,9 +94,9 @@ Plans:
 | 1. Foundation & Initialization | 3/3 | Complete | 2026-03-13 |
 | 2. Writing Pipeline & Compilation | 3/3 | Complete | 2026-03-13 |
 | 3. Academic Review & Continuity | 2/2 | Complete | 2026-03-13 |
-| 4. Reference Management | 0/? | Not started | - |
+| 4. Reference Management | 0/2 | Planning | - |
 | 5. Figure Management | 0/? | Not started | - |
 
 ---
 *Roadmap created: 2026-03-13*
-*Last updated: 2026-03-13 after Phase 3 Plan 02 execution*
+*Last updated: 2026-03-13 after Phase 4 planning*
