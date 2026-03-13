@@ -1,0 +1,80 @@
+% abntex2-config.tex - Default abnTeX2 configuration
+% Get Thesis Done (GTD)
+%
+% This file provides common abnTeX2 customizations for Brazilian academic theses.
+% It can be \input{} from main.tex if desired, but main.tex works without it.
+%
+% To use: add \input{abntex2-config} in main.tex preamble (after \documentclass).
+% To customize: copy this file to your project root and modify as needed.
+%
+% NOTE: This is the default configuration. Users with specific university templates
+% should create a custom configuration file or replace this one entirely.
+
+% --- Spacing ---
+% abnTeX2 defaults to 1.5 line spacing (ABNT NBR 14724 requirement).
+% Uncomment to override:
+% \OnehalfSpacing  % 1.5 spacing (default, ABNT compliant)
+% \SingleSpacing   % Single spacing (for block quotes, footnotes)
+
+% --- Paragraph indentation ---
+% ABNT NBR 14724 requires 1.25cm paragraph indentation.
+\setlength{\parindent}{1.25cm}
+
+% --- Paragraph spacing ---
+% ABNT NBR 14724: no extra space between paragraphs.
+\setlength{\parskip}{0cm}
+
+% --- Header and footer ---
+% abnTeX2 default: page number in upper right corner (ABNT compliant).
+% Uncomment to customize:
+% \makepagestyle{abntheadings}
+% \makeevenhead{abntheadings}{\ABNTEXfontereduzida\thepage}{}{}
+% \makeoddhead{abntheadings}{}{}{\ABNTEXfontereduzida\thepage}
+% \makeheadrule{abntheadings}{\textwidth}{\normalrulethickness}
+
+% --- Caption formatting ---
+% ABNT requires captions above figures/tables with specific formatting.
+% abnTeX2 handles this by default. Uncomment to customize:
+% \usepackage{caption}
+% \captionsetup{
+%   font=small,
+%   labelfont=bf,
+%   labelsep=endash,
+%   justification=centering,
+% }
+
+% --- Float placement ---
+% Prevent figures and tables from floating too far from their reference.
+% \usepackage{placeins}  % Provides \FloatBarrier
+
+% --- Code listings ---
+% Uncomment if the thesis includes code listings.
+% \usepackage{listings}
+% \lstset{
+%   basicstyle=\ttfamily\small,
+%   breaklines=true,
+%   frame=single,
+%   numbers=left,
+%   numberstyle=\tiny,
+% }
+
+% --- Mathematical packages ---
+% Uncomment if the thesis uses mathematical notation.
+% \usepackage{amsmath}
+% \usepackage{amssymb}
+% \usepackage{amsthm}
+
+% --- Color ---
+% Uncomment for colored text or hyperlinks.
+% \usepackage{xcolor}
+% \hypersetup{
+%   colorlinks=true,
+%   linkcolor=blue,
+%   citecolor=blue,
+%   urlcolor=blue,
+% }
+
+% --- Glossary / Acronyms ---
+% Uncomment if the thesis uses a formal glossary or acronym list.
+% \usepackage[acronym,nonumberlist]{glossaries}
+% \makeglossaries
