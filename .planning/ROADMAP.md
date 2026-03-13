@@ -25,7 +25,11 @@
   3. The scaffolded empty LaTeX project compiles to a structurally correct PDF with abnTeX2 (or custom template) without errors
   4. Thesis level (graduation/master's/PhD) and language configuration are persisted and affect downstream behavior
   5. `gtd-tools.js` CLI responds to init, progress, context, and compile subcommands
-**Plans**: TBD
+**Plans:** 3 plans
+Plans:
+- [ ] 01-01-PLAN.md -- Package infrastructure (package.json, install.js) and gtd-tools.js CLI
+- [ ] 01-02-PLAN.md -- Canonical document templates and LaTeX templates
+- [ ] 01-03-PLAN.md -- /gtd:new-thesis workflow, /gtd:progress, and /gtd:compile commands
 
 ### Phase 2: Writing Pipeline & Compilation
 **Goal**: A user can plan a chapter, generate a complete LaTeX draft through the two-wave writing process, and compile the thesis to PDF -- producing their first real chapter
@@ -77,7 +81,7 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & Initialization | 0/? | Not started | - |
+| 1. Foundation & Initialization | 0/3 | Planning complete | - |
 | 2. Writing Pipeline & Compilation | 0/? | Not started | - |
 | 3. Academic Review & Continuity | 0/? | Not started | - |
 | 4. Reference Management | 0/? | Not started | - |
