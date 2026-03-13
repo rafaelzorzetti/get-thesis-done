@@ -44,7 +44,7 @@ Plans:
 **Plans:** 3 plans
 Plans:
 - [x] 02-01-PLAN.md -- Agent adaptations (planner.md + writer.md for thesis/LaTeX) and extractChapterStructure() regex fix
-- [ ] 02-02-PLAN.md -- Workflows and commands (discuss-chapter, plan-chapter, write-chapter)
+- [x] 02-02-PLAN.md -- Workflows and commands (discuss-chapter, plan-chapter, write-chapter)
 - [x] 02-03-PLAN.md -- CLI extensions (sanitize, cite-keys, validate-citations, summary extract) and compilation figure hook
 
 ### Phase 3: Academic Review & Continuity
@@ -93,4 +93,4 @@ Plans:
 
 ---
 *Roadmap created: 2026-03-13*
-*Last updated: 2026-03-13 after 02-03 execution*
+*Last updated: 2026-03-13 after 02-02 execution*

@@ -22,8 +22,8 @@ Phase 2: [####] 3/3 plans complete
 | Metric | Value |
 |--------|-------|
 | Phases complete | 2/5 |
-| Plans complete | 6/? |
-| Requirements done | 22/43 |
+| Plans complete | 7/? |
+| Requirements done | 25/43 |
 | Session count | 5 |
 
 | Phase | Plan | Duration | Tasks | Files |
@@ -32,6 +32,7 @@ Phase 2: [####] 3/3 plans complete
 | 01 | 02 | 4m 46s | 2 | 9 |
 | 01 | 03 | 4m 27s | 2 | 4 |
 | 02 | 01 | 5m 49s | 2 | 3 |
+| 02 | 02 | 5m 36s | 2 | 6 |
 | 02 | 03 | 3m 1s | 2 | 1 |
 
 ## Accumulated Context
@@ -60,6 +61,10 @@ Phase 2: [####] 3/3 plans complete
 - Planner terminology table retains old terms in 'NOT This' column as intentional negative examples (02-01)
 - Writer anti-patterns adapted for academic context: Hedge->Weak Hedge, Balance->False Balance, Teacher->Textbook (02-01)
 - extractChapterStructure() lookahead changed to '### Chapter \d' for precise chapter boundary matching (02-01)
+- Discuss-chapter adds 5 thesis-specific discussion areas: methodology, key references, theoretical position, research question connection, data/evidence sources (02-02)
+- Write-chapter citation validation uses CLI with fallback to grep when validate-citations not yet available (02-02)
+- Write-chapter finalize copies DRAFT.tex to src/chapters/NN-slug.tex bridging writing pipeline to compilation pipeline (02-02)
+- All chapter workflows use direct git add/commit instead of phantom CLI commit wrapper (02-02)
 - Protected-zone placeholder approach for LaTeX sanitization: null-byte markers preserve command/math/comment zones during prose escaping (02-03)
 - Single biblatex regex covers all citation variants (cite, textcite, autocite, parencite, footcite, cites, starred, optional args) (02-03)
 - SUMMARY.md template is write-once (never overwrites existing) to protect human edits (02-03)
@@ -85,13 +90,13 @@ Phase 2: [####] 3/3 plans complete
 
 ### Last Session
 - **Date:** 2026-03-13
-- **What happened:** Executed Plan 02-03: Added 4 new commands to gtd-tools.js (cite-keys, sanitize, validate-citations, summary extract) and figure pre-processing hook. Context-aware LaTeX sanitization with protected zones, biblatex citation validation, SUMMARY.md template scaffolding. Phase 2 now complete (3/3 plans).
-- **Where we stopped:** Completed 02-03-PLAN.md. Phase 2 fully done. Ready for Phase 3 planning (Academic Review & Continuity).
+- **What happened:** Executed Plan 02-02: Created 3 chapter workflows (discuss-chapter, plan-chapter, write-chapter) and 3 /gtd:* slash commands. Thesis-specific discussion areas, planned citations display, LaTeX two-wave pipeline with citation validation, src/chapters/ compilation bridge. All Phase 2 plans now complete (3/3).
+- **Where we stopped:** Completed 02-02-PLAN.md. Phase 2 fully done. Ready for Phase 3 planning (Academic Review & Continuity).
 
 ### Next Session
 - Start with: Plan Phase 3 (Academic Review & Continuity -- reviewer agent, review workflows, continuity loop)
-- Context to load: ROADMAP.md Phase 3 details, 02-03-SUMMARY.md, all Phase 2 summaries
+- Context to load: ROADMAP.md Phase 3 details, all Phase 2 summaries (02-01, 02-02, 02-03)
 
 ---
 *State initialized: 2026-03-13*
-*Last updated: 2026-03-13 after 02-03 execution*
+*Last updated: 2026-03-13 after 02-02 execution*

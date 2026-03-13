@@ -33,13 +33,13 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Writing Pipeline
 
-- [ ] **WRITE-01**: `/gtd:discuss-chapter N` captures locked decisions before planning via CONTEXT.md
+- [x] **WRITE-01**: `/gtd:discuss-chapter N` captures locked decisions before planning via CONTEXT.md
 - [x] **WRITE-02**: `/gtd:plan-chapter N` spawns planner agent to create beat sheet (PLAN.md) with sections, arguments, and planned citations
-- [ ] **WRITE-03**: `/gtd:write-chapter N` orchestrates plan → Wave 1 (structural draft in LaTeX) → Wave 2 (polished prose in LaTeX)
+- [x] **WRITE-03**: `/gtd:write-chapter N` orchestrates plan → Wave 1 (structural draft in LaTeX) → Wave 2 (polished prose in LaTeX)
 - [x] **WRITE-04**: Writer agent produces LaTeX-native output (`\chapter{}`, `\section{}`, `\cite{}`, figure/table environments)
 - [x] **WRITE-05**: Writer agent operates in persona mode (academic author, not AI assistant) with anti-pattern suppression
 - [x] **WRITE-06**: Each agent spawns with fresh context window and loads canonical context via `gtd-tools.js context --chapter N`
-- [ ] **WRITE-07**: `/gtd:progress` displays thesis progress dashboard with chapter statuses and next recommended action
+- [x] **WRITE-07**: `/gtd:progress` displays thesis progress dashboard with chapter statuses and next recommended action
 
 ### Academic Review
 
@@ -133,13 +133,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CANON-02 | Phase 1 | Complete |
 | CANON-03 | Phase 1 | Complete |
 | CANON-04 | Phase 1 | Pending |
-| WRITE-01 | Phase 2 | Pending |
+| WRITE-01 | Phase 2 | Complete |
 | WRITE-02 | Phase 2 | Complete |
-| WRITE-03 | Phase 2 | Pending |
+| WRITE-03 | Phase 2 | Complete |
 | WRITE-04 | Phase 2 | Complete |
 | WRITE-05 | Phase 2 | Complete |
 | WRITE-06 | Phase 2 | Complete |
-| WRITE-07 | Phase 2 | Pending |
+| WRITE-07 | Phase 2 | Complete |
 | COMP-01 | Phase 2 | Pending |
 | COMP-02 | Phase 2 | Complete |
 | COMP-03 | Phase 2 | Pending |
@@ -169,4 +169,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-03-13*
-*Last updated: 2026-03-13 after 02-03 execution*
+*Last updated: 2026-03-13 after 02-02 execution*
