@@ -1496,9 +1496,275 @@ function cmdPdfRefs(cwd, raw) {
   output(resultData, raw, lines.join('\n'));
 }
 
+// --- Async Reference Commands (fetch-doi, pdf-meta) --------------------------
+
+/**
+ * Check if a system command is available on PATH.
+ * @param {string} command - Command name (e.g., 'pdfinfo')
+ * @returns {boolean}
+ */
+function checkSystemDep(command) {
+  try {
+    execSync('which ' + command, { stdio: 'pipe' });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * REF-03 helper: Extract DOI from PDF using graduated strategies.
+ * Strategy 1: pdfinfo metadata fields
+ * Strategy 2: pdftotext first 2 pages text scan
+ * @param {string} pdfPath - Absolute path to PDF file
+ * @returns {{ doi: string, source: string }|null}
+ */
+function extractDOIFromPdf(pdfPath) {
+  const doiPattern = /\b(10\.\d{4,9}\/[-._;()/:a-zA-Z0-9]+)\b/;
+
+  // Strategy 1: pdfinfo metadata
+  try {
+    const info = execSync('pdfinfo "' + pdfPath + '"', { stdio: 'pipe', encoding: 'utf-8' });
+    const match = info.match(doiPattern);
+    if (match) return { doi: match[1], source: 'metadata' };
+  } catch {
+    // pdfinfo not available or failed
+  }
+
+  // Strategy 2: pdftotext first 2 pages
+  try {
+    const text = execSync('pdftotext -f 1 -l 2 "' + pdfPath + '" -', { stdio: 'pipe', encoding: 'utf-8' });
+    const match = text.match(doiPattern);
+    if (match) return { doi: match[1], source: 'text' };
+  } catch {
+    // pdftotext not available or failed
+  }
+
+  return null;
+}
+
+/**
+ * Construct a minimal BibTeX entry when no DOI is found in PDF.
+ * Uses pdfinfo for title/author if available, else uses filename.
+ * @param {string} pdfPath - Absolute path to PDF file
+ * @returns {string} BibTeX entry text
+ */
+function constructMinimalBibEntry(pdfPath) {
+  const basename = path.basename(pdfPath, path.extname(pdfPath));
+  let title = basename;
+  let author = '';
+  let year = new Date().getFullYear().toString();
+
+  // Try to extract metadata via pdfinfo
+  try {
+    const info = execSync('pdfinfo "' + pdfPath + '"', { stdio: 'pipe', encoding: 'utf-8' });
+
+    const titleMatch = info.match(/^Title:\s+(.+)$/m);
+    if (titleMatch) title = titleMatch[1].trim();
+
+    const authorMatch = info.match(/^Author:\s+(.+)$/m);
+    if (authorMatch) author = authorMatch[1].trim();
+
+    const dateMatch = info.match(/^(?:CreationDate|ModDate):\s+.*(\d{4})/m);
+    if (dateMatch) year = dateMatch[1];
+  } catch {
+    // pdfinfo not available -- use filename-based entry
+  }
+
+  // Generate citation key from first author lastname + year
+  let key;
+  if (author) {
+    const lastName = author.split(/[,\s]+/)[0].toLowerCase().replace(/[^a-z]/g, '');
+    key = lastName + year;
+  } else {
+    key = 'unknown_' + year;
+  }
+
+  // Ensure key uniqueness by appending basename hash if generic
+  if (key === 'unknown_' + year) {
+    const hash = basename.slice(0, 8).toLowerCase().replace(/[^a-z0-9]/g, '');
+    key = 'unknown_' + hash + '_' + year;
+  }
+
+  const entry = [
+    '@misc{' + key + ',',
+    '  author = {' + (author || 'Unknown') + '},',
+    '  title = {' + title + '},',
+    '  year = {' + year + '},',
+    '  note = {PDF imported by get-thesis-done -- verify and complete this entry}',
+    '}',
+  ].join('\n');
+
+  return entry;
+}
+
+/**
+ * Core DOI fetch logic: normalize DOI, fetch BibTeX from Crossref.
+ * Shared by cmdFetchDoi and cmdPdfMeta.
+ * @param {string} doi - DOI string (may include prefix like https://doi.org/)
+ * @returns {Promise<string>} BibTeX text
+ * @throws {Error} on invalid DOI, network error, or unexpected response
+ */
+async function fetchBibtexFromDoi(doi) {
+  // Normalize DOI
+  let normalized = doi.trim();
+  normalized = normalized.replace(/^https?:\/\/doi\.org\//i, '');
+  normalized = normalized.replace(/^doi:/i, '');
+  normalized = normalized.trim();
+
+  // Validate format
+  if (!/^10\.\d{4,9}\//.test(normalized)) {
+    throw new Error('Invalid DOI format: ' + normalized + '. Expected format: 10.XXXX/...');
+  }
+
+  // Fetch BibTeX from Crossref via content negotiation
+  const url = 'https://doi.org/' + encodeURIComponent(normalized);
+  const response = await fetch(url, {
+    headers: {
+      'Accept': 'application/x-bibtex',
+      'User-Agent': 'get-thesis-done/1.0 (mailto:user@example.com)',
+    },
+    redirect: 'follow',
+  });
+
+  if (!response.ok) {
+    throw new Error('DOI fetch failed with HTTP ' + response.status + ' for DOI: ' + normalized);
+  }
+
+  // Check content-type
+  const contentType = response.headers.get('content-type') || '';
+  if (!contentType.includes('bibtex') && !contentType.includes('text/plain')) {
+    throw new Error('DOI may not support BibTeX content negotiation. Content-Type: ' + contentType);
+  }
+
+  const bibtex = await response.text();
+
+  // HTML fallback detection
+  if (bibtex.trimStart().startsWith('<!DOCTYPE') || bibtex.trimStart().startsWith('<html')) {
+    throw new Error('Received HTML instead of BibTeX. DOI may not support content negotiation.');
+  }
+
+  return bibtex;
+}
+
+/**
+ * REF-02: Fetch BibTeX from DOI via Crossref content negotiation.
+ * @param {string} cwd - Current working directory
+ * @param {string} doi - DOI string
+ * @param {boolean} raw - Whether to output raw text
+ */
+async function cmdFetchDoi(cwd, doi, raw) {
+  if (!doi) error('--doi required. Usage: fetch-doi --doi 10.XXXX/...');
+
+  const bibtex = await fetchBibtexFromDoi(doi);
+  const bibPath = path.join(cwd, 'src', 'references.bib');
+  appendBibEntry(bibPath, bibtex);
+
+  // Extract the key from fetched BibTeX for reporting
+  const keys = extractBibKeys(bibtex);
+  const key = keys.size > 0 ? [...keys][0] : 'unknown';
+
+  // Normalize DOI for output
+  let normalizedDoi = doi.trim();
+  normalizedDoi = normalizedDoi.replace(/^https?:\/\/doi\.org\//i, '');
+  normalizedDoi = normalizedDoi.replace(/^doi:/i, '');
+  normalizedDoi = normalizedDoi.trim();
+
+  output({
+    doi: normalizedDoi,
+    key,
+    bibtex,
+    appended_to: 'src/references.bib',
+  }, raw, 'Fetched and added:\n' + bibtex);
+}
+
+/**
+ * REF-03: Extract DOI from PDF metadata, fetch BibTeX, or create minimal entry.
+ * @param {string} cwd - Current working directory
+ * @param {string} filePath - Path to PDF file
+ * @param {boolean} raw - Whether to output raw text
+ */
+async function cmdPdfMeta(cwd, filePath, raw) {
+  if (!filePath) error('--file required. Usage: pdf-meta --file path.pdf');
+
+  // Resolve path relative to cwd if not absolute
+  const resolvedPath = path.isAbsolute(filePath) ? filePath : path.join(cwd, filePath);
+
+  if (!fs.existsSync(resolvedPath)) {
+    error('File not found: ' + resolvedPath);
+  }
+
+  if (!resolvedPath.toLowerCase().endsWith('.pdf')) {
+    error('File must be a PDF: ' + resolvedPath);
+  }
+
+  // Check for poppler-utils availability
+  const hasPdfinfo = checkSystemDep('pdfinfo');
+  const hasPdftotext = checkSystemDep('pdftotext');
+
+  if (!hasPdfinfo && !hasPdftotext) {
+    const platform = process.platform;
+    let installHint;
+    if (platform === 'darwin') {
+      installHint = 'brew install poppler';
+    } else {
+      installHint = 'sudo apt install poppler-utils';
+    }
+    error('Neither pdfinfo nor pdftotext found. Install poppler-utils:\n  ' + installHint);
+  }
+
+  const bibPath = path.join(cwd, 'src', 'references.bib');
+
+  // Try to extract DOI from PDF
+  const doiResult = extractDOIFromPdf(resolvedPath);
+
+  if (doiResult) {
+    // DOI found -- fetch BibTeX from Crossref
+    try {
+      const bibtex = await fetchBibtexFromDoi(doiResult.doi);
+      appendBibEntry(bibPath, bibtex);
+
+      output({
+        pdf: filePath,
+        doi: doiResult.doi,
+        doi_source: doiResult.source,
+        bibtex,
+        appended_to: 'src/references.bib',
+      }, raw, 'Found DOI ' + doiResult.doi + ' in PDF ' + doiResult.source + '. Fetched and added:\n' + bibtex);
+    } catch (fetchErr) {
+      // DOI found but fetch failed -- fall back to minimal entry
+      const minEntry = constructMinimalBibEntry(resolvedPath);
+      appendBibEntry(bibPath, minEntry);
+
+      output({
+        pdf: filePath,
+        doi: doiResult.doi,
+        doi_source: doiResult.source,
+        minimal_entry: true,
+        bibtex: minEntry,
+        appended_to: 'src/references.bib',
+        warning: 'DOI found but Crossref fetch failed (' + fetchErr.message + '). Minimal entry created -- please verify and complete.',
+      }, raw, 'Found DOI ' + doiResult.doi + ' but fetch failed. Created minimal entry (please verify):\n' + minEntry);
+    }
+  } else {
+    // No DOI found -- construct minimal entry
+    const minEntry = constructMinimalBibEntry(resolvedPath);
+    appendBibEntry(bibPath, minEntry);
+
+    output({
+      pdf: filePath,
+      doi: null,
+      minimal_entry: true,
+      bibtex: minEntry,
+      appended_to: 'src/references.bib',
+      warning: 'No DOI found. Minimal entry created -- please verify and complete.',
+    }, raw, 'No DOI found in PDF. Created minimal entry (please verify):\n' + minEntry);
+  }
+}
+
 // --- CLI Router --------------------------------------------------------------
 
-function main() {
+async function main() {
   const args = process.argv.slice(2);
   const rawIndex = args.indexOf('--raw');
   const raw = rawIndex !== -1;
@@ -1583,6 +1849,18 @@ function main() {
       break;
     }
 
+    case 'fetch-doi': {
+      const doiIdx = args.indexOf('--doi');
+      await cmdFetchDoi(cwd, doiIdx !== -1 ? args[doiIdx + 1] : null, raw);
+      break;
+    }
+
+    case 'pdf-meta': {
+      const fileIdx = args.indexOf('--file');
+      await cmdPdfMeta(cwd, fileIdx !== -1 ? args[fileIdx + 1] : null, raw);
+      break;
+    }
+
     case 'validate-refs': {
       cmdValidateRefs(cwd, raw);
       break;
@@ -1599,4 +1877,4 @@ function main() {
   }
 }
 
-main();
+main().catch(err => { process.stderr.write('Error: ' + err.message + '\n'); process.exit(1); });
