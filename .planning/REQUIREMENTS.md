@@ -43,11 +43,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Academic Review
 
-- [ ] **REVIEW-01**: `/gtd:review-chapter N` spawns reviewer agent with adversarial stance
-- [ ] **REVIEW-02**: Reviewer checks citation validity — every key argument has `\cite{}`, every `\cite{}` exists in .bib
-- [ ] **REVIEW-03**: Reviewer checks methodological rigor — consistency with methodology chapter, appropriate methods for claims
-- [ ] **REVIEW-04**: Reviewer checks argumentative coherence — logical continuity across chapters, theoretical framework respected
-- [ ] **REVIEW-05**: Reviewer checks formatting norms — ABNT/APA compliance, LaTeX structure, margins, spacing
+- [x] **REVIEW-01**: `/gtd:review-chapter N` spawns reviewer agent with adversarial stance
+- [x] **REVIEW-02**: Reviewer checks citation validity — every key argument has `\cite{}`, every `\cite{}` exists in .bib
+- [x] **REVIEW-03**: Reviewer checks methodological rigor — consistency with methodology chapter, appropriate methods for claims
+- [x] **REVIEW-04**: Reviewer checks argumentative coherence — logical continuity across chapters, theoretical framework respected
+- [x] **REVIEW-05**: Reviewer checks formatting norms — ABNT/APA compliance, LaTeX structure, margins, spacing
 - [x] **REVIEW-06**: Review supports up to 2 revision cycles before forcing author decision
 - [x] **REVIEW-07**: Approved chapters trigger continuity loop — framework-keeper updates FRAMEWORK.md, summary-writer fills SUMMARY.md
 
@@ -144,11 +144,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | COMP-02 | Phase 2 | Complete |
 | COMP-03 | Phase 2 | Pending |
 | COMP-04 | Phase 2 | Complete |
-| REVIEW-01 | Phase 3 | Pending |
-| REVIEW-02 | Phase 3 | Pending |
-| REVIEW-03 | Phase 3 | Pending |
-| REVIEW-04 | Phase 3 | Pending |
-| REVIEW-05 | Phase 3 | Pending |
+| REVIEW-01 | Phase 3 | Complete |
+| REVIEW-02 | Phase 3 | Complete |
+| REVIEW-03 | Phase 3 | Complete |
+| REVIEW-04 | Phase 3 | Complete |
+| REVIEW-05 | Phase 3 | Complete |
 | REVIEW-06 | Phase 3 | Complete |
 | REVIEW-07 | Phase 3 | Complete |
 | REF-01 | Phase 4 | Pending |
