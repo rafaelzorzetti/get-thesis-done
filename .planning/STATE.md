@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: planning
-last_updated: "2026-03-13T20:22:31.064Z"
+status: executing
+last_updated: "2026-03-13T23:54:50Z"
 progress:
   total_phases: 5
   completed_phases: 3
-  total_plans: 8
-  completed_plans: 8
+  total_plans: 10
+  completed_plans: 9
 ---
 
 # Project State: Get Thesis Done (GTD)
@@ -16,18 +16,18 @@ progress:
 ## Project Reference
 
 **Core Value:** Academic rigor and consistency throughout the entire thesis -- every chapter coherent with the theoretical framework, every citation validated, formatting norms enforced automatically.
-**Current Focus:** Phase 4 planned (Reference Management). 2 plans in 2 waves ready for execution.
+**Current Focus:** Phase 4 executing (Reference Management). Plan 01 complete, Plan 02 next.
 
 ## Current Position
 
 **Milestone:** v1
 **Phase:** 4 - Reference Management
-**Plan:** Planned (2 plans)
-**Status:** Ready to execute
+**Plan:** 2 of 2
+**Status:** Executing (Plan 01 complete)
 
 ```
 [###--] 60% (3/5 phases complete)
-Phase 3: [####] 2/2 plans complete
+Phase 4: [##--] 1/2 plans complete
 ```
 
 ## Performance Metrics
@@ -35,9 +35,9 @@ Phase 3: [####] 2/2 plans complete
 | Metric | Value |
 |--------|-------|
 | Phases complete | 3/5 |
-| Plans complete | 9/? |
-| Requirements done | 27/43 |
-| Session count | 7 |
+| Plans complete | 9/10 |
+| Requirements done | 32/43 |
+| Session count | 8 |
 
 | Phase | Plan | Duration | Tasks | Files |
 |-------|------|----------|-------|-------|
@@ -49,6 +49,7 @@ Phase 3: [####] 2/2 plans complete
 | 02 | 03 | 3m 1s | 2 | 1 |
 | 03 | 01 | 9m 39s | 2 | 3 |
 | 03 | 02 | 6m 37s | 2 | 4 |
+| 04 | 01 | 4m 44s | 2 | 2 |
 
 ## Accumulated Context
 
@@ -96,6 +97,11 @@ Phase 3: [####] 2/2 plans complete
 - Terminology tables retain old terms in NOT This column as intentional negative examples across all agents/workflows (03-02)
 - All draft paths use .tex extension: DRAFT.tex, DRAFT-r1.tex, DRAFT-r2.tex (LaTeX-native pipeline) (03-02)
 - Direct git add/commit in review and continuity workflows (same Phase 2 decision -- no phantom CLI wrapper) (03-02)
+- fetchBibtexFromDoi extracted as shared async helper for both fetch-doi and pdf-meta commands (04-01)
+- appendBibEntry defensively creates parent directory, making import-bib usable on fresh projects without init (04-01)
+- pdf-meta graceful degradation chain: pdfinfo -> pdftotext -> Crossref fetch -> minimal entry fallback (04-01)
+- validate-refs picks latest DRAFT revision per chapter directory (DRAFT-r2 > DRAFT-r1 > DRAFT) (04-01)
+- constructMinimalBibEntry generates unique keys via author-year + filename-hash fallback to avoid collisions (04-01)
 
 ### Research Flags
 - Phase 5 (Figure Pipeline): Excalidraw export tooling at MEDIUM confidence -- validate excalidraw-brute-export-cli reliability on WSL2/Linux before building around it
@@ -117,13 +123,13 @@ Phase 3: [####] 2/2 plans complete
 
 ### Last Session
 - **Date:** 2026-03-13
-- **What happened:** Planned Phase 4 (Reference Management). Research completed (Crossref content negotiation, PDF metadata via poppler-utils, CLI extension patterns). 2 plans created: (1) CLI extensions + reference-manager agent, (2) add-reference workflow + command. Plan checker verified all 8 dimensions pass.
-- **Where we stopped:** Phase 4 planned (2 plans in 2 waves). Ready for execution.
+- **What happened:** Executed Phase 4 Plan 01 (CLI Extensions + Reference-Manager Agent). Added 5 new CLI commands (import-bib, fetch-doi, pdf-meta, validate-refs, pdf-refs) to gtd-tools.js, converted main() to async, created reference-manager agent. All verification passed.
+- **Where we stopped:** Completed 04-01-PLAN.md. Plan 02 (add-reference workflow + command) is next.
 
 ### Next Session
-- Start with: Phase 4 execution (/gsd:execute-phase 4)
-- Context to load: 04-01-PLAN.md, 04-02-PLAN.md
+- Start with: Phase 4 Plan 02 execution
+- Context to load: 04-02-PLAN.md
 
 ---
 *State initialized: 2026-03-13*
-*Last updated: 2026-03-13 after Phase 3 Plan 02 execution*
+*Last updated: 2026-03-13 after Phase 4 Plan 01 execution*

@@ -56,8 +56,8 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **REF-01**: `/gtd:add-reference` imports entries from existing .bib file (Zotero/Mendeley export)
 - [ ] **REF-02**: `/gtd:add-reference` fetches BibTeX from DOI via Crossref REST API
 - [ ] **REF-03**: `/gtd:add-reference` extracts metadata from PDF files and generates .bib entries
-- [ ] **REF-04**: Reference-manager agent validates all `\cite{}` in chapters against `references.bib`
-- [ ] **REF-05**: System cross-references cited keys with available PDFs in `references/` directory
+- [x] **REF-04**: Reference-manager agent validates all `\cite{}` in chapters against `references.bib`
+- [x] **REF-05**: System cross-references cited keys with available PDFs in `references/` directory
 
 ### Figure Management
 
@@ -154,8 +154,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | REF-01 | Phase 4 | Pending |
 | REF-02 | Phase 4 | Pending |
 | REF-03 | Phase 4 | Pending |
-| REF-04 | Phase 4 | Pending |
-| REF-05 | Phase 4 | Pending |
+| REF-04 | Phase 4 | Complete |
+| REF-05 | Phase 4 | Complete |
 | FIG-01 | Phase 5 | Pending |
 | FIG-02 | Phase 5 | Pending |
 | FIG-03 | Phase 5 | Pending |
@@ -169,4 +169,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-03-13*
-*Last updated: 2026-03-13 after 02-02 execution*
+*Last updated: 2026-03-13 after 04-01 execution*
