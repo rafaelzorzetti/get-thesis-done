@@ -28,7 +28,7 @@
 **Plans:** 3 plans
 Plans:
 - [ ] 01-01-PLAN.md -- Package infrastructure (package.json, install.js) and gtd-tools.js CLI
-- [ ] 01-02-PLAN.md -- Canonical document templates and LaTeX templates
+- [x] 01-02-PLAN.md -- Canonical document templates and LaTeX templates
 - [ ] 01-03-PLAN.md -- /gtd:new-thesis workflow, /gtd:progress, and /gtd:compile commands
 
 ### Phase 2: Writing Pipeline & Compilation
@@ -81,7 +81,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & Initialization | 0/3 | Planning complete | - |
+| 1. Foundation & Initialization | 2/3 | In progress | - |
 | 2. Writing Pipeline & Compilation | 0/? | Not started | - |
 | 3. Academic Review & Continuity | 0/? | Not started | - |
 | 4. Reference Management | 0/? | Not started | - |
@@ -89,4 +89,4 @@ Plans:
 
 ---
 *Roadmap created: 2026-03-13*
-*Last updated: 2026-03-13*
+*Last updated: 2026-03-13 after 01-02 execution*

@@ -11,24 +11,24 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [ ] **FOUND-01**: System installs as npm package with `/gtd:*` commands for Claude Code
 - [ ] **FOUND-02**: `gtd-tools.js` CLI provides init, progress, context assembly, and compile commands
-- [ ] **FOUND-03**: LaTeX template system supports abnTeX2 as default with custom university template override
-- [ ] **FOUND-04**: Thesis language is configurable per project (PT-BR, EN, ES, etc.)
-- [ ] **FOUND-05**: Package distributes via npm (commands) + pip requirements.txt (Python figure dependencies)
+- [x] **FOUND-03**: LaTeX template system supports abnTeX2 as default with custom university template override
+- [x] **FOUND-04**: Thesis language is configurable per project (PT-BR, EN, ES, etc.)
+- [x] **FOUND-05**: Package distributes via npm (commands) + pip requirements.txt (Python figure dependencies)
 
 ### Initialization
 
 - [ ] **INIT-01**: `/gtd:new-thesis` conducts deep questioning about topic, level, advisor, norms, language, structure
-- [ ] **INIT-02**: System scaffolds FRAMEWORK.md, STYLE_GUIDE.md, STRUCTURE.md from templates based on author's answers
-- [ ] **INIT-03**: System generates `main.tex` and chapter `.tex` stubs from LaTeX template
+- [x] **INIT-02**: System scaffolds FRAMEWORK.md, STYLE_GUIDE.md, STRUCTURE.md from templates based on author's answers
+- [x] **INIT-03**: System generates `main.tex` and chapter `.tex` stubs from LaTeX template
 - [ ] **INIT-04**: Thesis level (graduation/master's/PhD) is recorded and affects rigor expectations and review criteria
-- [ ] **INIT-05**: System creates `references.bib` and `references/` directory for PDFs
-- [ ] **INIT-06**: System creates `figures/` directory structure and `FIGURES.md` catalog
+- [x] **INIT-05**: System creates `references.bib` and `references/` directory for PDFs
+- [x] **INIT-06**: System creates `figures/` directory structure and `FIGURES.md` catalog
 
 ### Canonical Documents
 
-- [ ] **CANON-01**: FRAMEWORK.md tracks theoretical framework, glossary of technical terms, argumentative positions, and continuity map
-- [ ] **CANON-02**: STYLE_GUIDE.md specifies academic voice, citation style rules (ABNT/APA), anti-patterns, and language calibration
-- [ ] **CANON-03**: STRUCTURE.md defines thesis structure with chapter contracts, section dependencies, and arc tracking
+- [x] **CANON-01**: FRAMEWORK.md tracks theoretical framework, glossary of technical terms, argumentative positions, and continuity map
+- [x] **CANON-02**: STYLE_GUIDE.md specifies academic voice, citation style rules (ABNT/APA), anti-patterns, and language calibration
+- [x] **CANON-03**: STRUCTURE.md defines thesis structure with chapter contracts, section dependencies, and arc tracking
 - [ ] **CANON-04**: Canonical documents serve as single source of truth for all agents via context assembly
 
 ### Writing Pipeline
@@ -120,18 +120,18 @@ Which phases cover which requirements. Updated during roadmap creation.
 |-------------|-------|--------|
 | FOUND-01 | Phase 1 | Pending |
 | FOUND-02 | Phase 1 | Pending |
-| FOUND-03 | Phase 1 | Pending |
-| FOUND-04 | Phase 1 | Pending |
-| FOUND-05 | Phase 1 | Pending |
+| FOUND-03 | Phase 1 | Complete |
+| FOUND-04 | Phase 1 | Complete |
+| FOUND-05 | Phase 1 | Complete |
 | INIT-01 | Phase 1 | Pending |
-| INIT-02 | Phase 1 | Pending |
-| INIT-03 | Phase 1 | Pending |
+| INIT-02 | Phase 1 | Complete |
+| INIT-03 | Phase 1 | Complete |
 | INIT-04 | Phase 1 | Pending |
-| INIT-05 | Phase 1 | Pending |
-| INIT-06 | Phase 1 | Pending |
-| CANON-01 | Phase 1 | Pending |
-| CANON-02 | Phase 1 | Pending |
-| CANON-03 | Phase 1 | Pending |
+| INIT-05 | Phase 1 | Complete |
+| INIT-06 | Phase 1 | Complete |
+| CANON-01 | Phase 1 | Complete |
+| CANON-02 | Phase 1 | Complete |
+| CANON-03 | Phase 1 | Complete |
 | CANON-04 | Phase 1 | Pending |
 | WRITE-01 | Phase 2 | Pending |
 | WRITE-02 | Phase 2 | Pending |
@@ -169,4 +169,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-03-13*
-*Last updated: 2026-03-13 after roadmap creation*
+*Last updated: 2026-03-13 after 01-02 execution*
