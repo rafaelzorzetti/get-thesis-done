@@ -118,13 +118,55 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| — | — | — |
+| FOUND-01 | Phase 1 | Pending |
+| FOUND-02 | Phase 1 | Pending |
+| FOUND-03 | Phase 1 | Pending |
+| FOUND-04 | Phase 1 | Pending |
+| FOUND-05 | Phase 1 | Pending |
+| INIT-01 | Phase 1 | Pending |
+| INIT-02 | Phase 1 | Pending |
+| INIT-03 | Phase 1 | Pending |
+| INIT-04 | Phase 1 | Pending |
+| INIT-05 | Phase 1 | Pending |
+| INIT-06 | Phase 1 | Pending |
+| CANON-01 | Phase 1 | Pending |
+| CANON-02 | Phase 1 | Pending |
+| CANON-03 | Phase 1 | Pending |
+| CANON-04 | Phase 1 | Pending |
+| WRITE-01 | Phase 2 | Pending |
+| WRITE-02 | Phase 2 | Pending |
+| WRITE-03 | Phase 2 | Pending |
+| WRITE-04 | Phase 2 | Pending |
+| WRITE-05 | Phase 2 | Pending |
+| WRITE-06 | Phase 2 | Pending |
+| WRITE-07 | Phase 2 | Pending |
+| COMP-01 | Phase 2 | Pending |
+| COMP-02 | Phase 2 | Pending |
+| COMP-03 | Phase 2 | Pending |
+| COMP-04 | Phase 2 | Pending |
+| REVIEW-01 | Phase 3 | Pending |
+| REVIEW-02 | Phase 3 | Pending |
+| REVIEW-03 | Phase 3 | Pending |
+| REVIEW-04 | Phase 3 | Pending |
+| REVIEW-05 | Phase 3 | Pending |
+| REVIEW-06 | Phase 3 | Pending |
+| REVIEW-07 | Phase 3 | Pending |
+| REF-01 | Phase 4 | Pending |
+| REF-02 | Phase 4 | Pending |
+| REF-03 | Phase 4 | Pending |
+| REF-04 | Phase 4 | Pending |
+| REF-05 | Phase 4 | Pending |
+| FIG-01 | Phase 5 | Pending |
+| FIG-02 | Phase 5 | Pending |
+| FIG-03 | Phase 5 | Pending |
+| FIG-04 | Phase 5 | Pending |
+| FIG-05 | Phase 5 | Pending |
 
 **Coverage:**
-- v1 requirements: 35 total
-- Mapped to phases: 0
-- Unmapped: 35
+- v1 requirements: 43 total
+- Mapped to phases: 43
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-13*
-*Last updated: 2026-03-13 after initial definition*
+*Last updated: 2026-03-13 after roadmap creation*
