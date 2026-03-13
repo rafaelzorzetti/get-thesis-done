@@ -58,7 +58,7 @@ Plans:
   4. When a chapter is approved, FRAMEWORK.md is automatically updated (glossary, positions, continuity map) and SUMMARY.md is generated for the inter-chapter context chain
 **Plans:** 2 plans
 Plans:
-- [ ] 03-01-PLAN.md -- Agent adaptations (reviewer.md with 4 thesis categories, framework-keeper.md, summary-writer.md)
+- [x] 03-01-PLAN.md -- Agent adaptations (reviewer.md with 4 thesis categories, framework-keeper.md, summary-writer.md)
 - [ ] 03-02-PLAN.md -- Workflows, command, and CLI (review-chapter + continuity-loop workflows, /gtd:review-chapter command, framework update CLI)
 
 ### Phase 4: Reference Management
@@ -90,10 +90,10 @@ Plans:
 |-------|----------------|--------|-----------|
 | 1. Foundation & Initialization | 3/3 | Complete | 2026-03-13 |
 | 2. Writing Pipeline & Compilation | 3/3 | Complete | 2026-03-13 |
-| 3. Academic Review & Continuity | 0/2 | Planned | - |
+| 3. Academic Review & Continuity | 1/2 | In progress | - |
 | 4. Reference Management | 0/? | Not started | - |
 | 5. Figure Management | 0/? | Not started | - |
 
 ---
 *Roadmap created: 2026-03-13*
-*Last updated: 2026-03-13 after Phase 3 planning*
+*Last updated: 2026-03-13 after Phase 3 Plan 01 execution*
