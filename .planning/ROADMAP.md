@@ -7,7 +7,7 @@
 
 ## Phases
 
-- [ ] **Phase 1: Foundation & Initialization** - Installable package that scaffolds a compilable, empty ABNT-compliant LaTeX thesis with canonical documents
+- [x] **Phase 1: Foundation & Initialization** - Installable package that scaffolds a compilable, empty ABNT-compliant LaTeX thesis with canonical documents
 - [ ] **Phase 2: Writing Pipeline & Compilation** - Plan chapters, generate LaTeX drafts in two waves, and compile to PDF
 - [ ] **Phase 3: Academic Review & Continuity** - Adversarial 4-category review with continuity loop for cross-chapter coherence
 - [ ] **Phase 4: Reference Management** - Import, fetch, and validate references from .bib, DOI, and PDF sources
@@ -29,7 +29,7 @@
 Plans:
 - [x] 01-01-PLAN.md -- Package infrastructure (package.json, install.js) and gtd-tools.js CLI
 - [x] 01-02-PLAN.md -- Canonical document templates and LaTeX templates
-- [ ] 01-03-PLAN.md -- /gtd:new-thesis workflow, /gtd:progress, and /gtd:compile commands
+- [x] 01-03-PLAN.md -- /gtd:new-thesis workflow, /gtd:progress, and /gtd:compile commands
 
 ### Phase 2: Writing Pipeline & Compilation
 **Goal**: A user can plan a chapter, generate a complete LaTeX draft through the two-wave writing process, and compile the thesis to PDF -- producing their first real chapter
@@ -81,7 +81,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & Initialization | 2/3 | In progress | - |
+| 1. Foundation & Initialization | 3/3 | Complete | 2026-03-13 |
 | 2. Writing Pipeline & Compilation | 0/? | Not started | - |
 | 3. Academic Review & Continuity | 0/? | Not started | - |
 | 4. Reference Management | 0/? | Not started | - |
@@ -89,4 +89,4 @@ Plans:
 
 ---
 *Roadmap created: 2026-03-13*
-*Last updated: 2026-03-13 after 01-02 execution*
+*Last updated: 2026-03-13 after 01-03 execution*

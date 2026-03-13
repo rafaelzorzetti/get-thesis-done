@@ -17,7 +17,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Initialization
 
-- [ ] **INIT-01**: `/gtd:new-thesis` conducts deep questioning about topic, level, advisor, norms, language, structure
+- [x] **INIT-01**: `/gtd:new-thesis` conducts deep questioning about topic, level, advisor, norms, language, structure
 - [x] **INIT-02**: System scaffolds FRAMEWORK.md, STYLE_GUIDE.md, STRUCTURE.md from templates based on author's answers
 - [x] **INIT-03**: System generates `main.tex` and chapter `.tex` stubs from LaTeX template
 - [x] **INIT-04**: Thesis level (graduation/master's/PhD) is recorded and affects rigor expectations and review criteria
