@@ -22,6 +22,8 @@
  *   pdf-meta --file path.pdf    Extract DOI from PDF metadata and fetch BibTeX
  *   validate-refs                Cross-chapter citation validation (missing/orphaned)
  *   pdf-refs                     Cross-reference bib keys with PDFs in src/references/
+ *   register-figure              Register a figure in FIGURES.md catalog
+ *   validate-figs                Cross-reference figure validation (catalog vs chapters)
  */
 
 const fs = require('fs');
@@ -617,7 +619,12 @@ function cmdCompile(cwd, raw, clean) {
 
   // --- Figure Pre-Processing Hook (Phase 5) ---
   const figureResult = preProcessFigures(cwd);
-  // When Phase 5 implements this, check figureResult.errors
+  if (figureResult.errors.length > 0) {
+    process.stderr.write('Figure pre-processing warnings:\n');
+    for (const err of figureResult.errors) {
+      process.stderr.write('  - ' + err + '\n');
+    }
+  }
 
   // Run latexmk
   let stdout = '';
@@ -664,6 +671,8 @@ function cmdCompile(cwd, raw, clean) {
     pdf_path: success && pdfExists ? pdfPath : null,
     errors: errors.slice(0, 20),
     warnings: warnings.slice(0, 20),
+    figures_processed: figureResult.processed,
+    figure_errors: figureResult.errors,
   }, raw, success && pdfExists
     ? `Compilation successful: ${pdfPath}`
     : `Compilation failed. ${errors.length} error(s):\n${errors.slice(0, 5).join('\n')}`
@@ -1005,21 +1014,479 @@ function cmdSummaryExtract(cwd, chapter, raw) {
 }
 
 // --- Figure Pre-Processing Hook (Phase 5) ------------------------------------
-// Phase 5 will insert figure export pipeline here:
-// - Excalidraw -> PDF export
-// - Python scripts -> PNG/PDF generation
-// - Mermaid -> PNG/PDF conversion
-// TikZ figures compile inline (no pre-processing needed)
+
+/**
+ * Export an Excalidraw file to PDF.
+ * Tries excalirender first, falls back to npx excalidraw-to-svg + rsvg-convert.
+ * @param {string} srcPath - Path to .excalidraw source file
+ * @param {string} exportPath - Path for the exported PDF
+ * @returns {{ success: boolean, method?: string, error?: string }}
+ */
+function exportExcalidraw(srcPath, exportPath) {
+  // Ensure export directory exists
+  const exportDir = path.dirname(exportPath);
+  fs.mkdirSync(exportDir, { recursive: true });
+
+  // Strategy 1: excalirender
+  try {
+    execSync('which excalirender', { stdio: 'pipe' });
+    execSync('excalirender "' + srcPath + '" --output "' + exportPath + '"', {
+      stdio: 'pipe',
+      encoding: 'utf-8',
+      timeout: 30000,
+    });
+    return { success: true, method: 'excalirender' };
+  } catch {
+    // excalirender not available or failed
+  }
+
+  // Strategy 2: npx excalidraw-to-svg + rsvg-convert
+  try {
+    execSync('which rsvg-convert', { stdio: 'pipe' });
+    const svgPath = exportPath.replace(/\.pdf$/i, '.svg');
+    execSync('npx excalidraw-to-svg "' + srcPath + '" --output "' + svgPath + '"', {
+      stdio: 'pipe',
+      encoding: 'utf-8',
+      timeout: 60000,
+    });
+    execSync('rsvg-convert -f pdf -o "' + exportPath + '" "' + svgPath + '"', {
+      stdio: 'pipe',
+      encoding: 'utf-8',
+      timeout: 30000,
+    });
+    // Clean up intermediate SVG
+    try { fs.unlinkSync(svgPath); } catch { /* ignore */ }
+    return { success: true, method: 'excalidraw-to-svg+rsvg-convert' };
+  } catch (err) {
+    return { success: false, error: err.message || 'Export failed' };
+  }
+}
 
 /**
  * Pre-process figures before LaTeX compilation.
- * Currently a no-op hook -- Phase 5 implements this.
+ * Exports Excalidraw figures to PDF for LaTeX inclusion.
  * @param {string} cwd - Current working directory
  * @returns {{ processed: number, errors: string[] }}
  */
 function preProcessFigures(cwd) {
-  // No-op: Phase 5 implements this
-  return { processed: 0, errors: [] };
+  const figuresPath = path.join(cwd, '.planning', 'FIGURES.md');
+  const content = safeReadFile(figuresPath);
+  if (!content) {
+    return { processed: 0, errors: [] };
+  }
+
+  const catalog = parseFiguresCatalog(content);
+  const excalidrawFigs = catalog.filter(fig => fig.type === 'excalidraw');
+  const errors = [];
+  let processed = 0;
+
+  for (const fig of excalidrawFigs) {
+    const srcPath = path.join(cwd, 'src', fig.sourceFile);
+    const exportPath = path.join(cwd, 'src', 'figures', 'exports', fig.id + '.pdf');
+
+    // Check source exists
+    if (!fs.existsSync(srcPath)) {
+      errors.push('Source not found: ' + fig.sourceFile + ' (figure: ' + fig.id + ')');
+      continue;
+    }
+
+    // Skip if export is up-to-date (mtime check)
+    if (fs.existsSync(exportPath)) {
+      const srcStat = fs.statSync(srcPath);
+      const expStat = fs.statSync(exportPath);
+      if (expStat.mtimeMs >= srcStat.mtimeMs) {
+        continue; // export is up-to-date
+      }
+    }
+
+    const result = exportExcalidraw(srcPath, exportPath);
+    if (result.success) {
+      processed++;
+    } else {
+      errors.push('Export failed for ' + fig.id + ': ' + (result.error || 'unknown error'));
+    }
+  }
+
+  return { processed, errors };
+}
+
+// --- Figure Catalog Helpers (Phase 5) ----------------------------------------
+
+/**
+ * Parse the Figures table from FIGURES.md content.
+ * @param {string} content - FIGURES.md file content
+ * @returns {Array<{id: string, caption: string, chapter: string, type: string, sourceFile: string, status: string}>}
+ */
+function parseFiguresCatalog(content) {
+  // Find the ## Figures section
+  const figuresMatch = content.match(/## Figures\b/);
+  if (!figuresMatch) return [];
+
+  const startIdx = figuresMatch.index + figuresMatch[0].length;
+
+  // Find ## Tables section (or end of file) to delimit
+  const tablesMatch = content.indexOf('## Tables', startIdx);
+  const section = tablesMatch !== -1
+    ? content.slice(startIdx, tablesMatch)
+    : content.slice(startIdx);
+
+  const lines = section.split('\n');
+  const results = [];
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+
+    // Skip empty lines, comment lines, header row, separator row
+    if (!trimmed) continue;
+    if (trimmed.startsWith('<!--') || trimmed.startsWith('//')) continue;
+    if (/^\| *ID *\|/.test(trimmed)) continue;
+    if (/^\|[-| ]+\|$/.test(trimmed)) continue;
+
+    // Must start with | to be a table row
+    if (!trimmed.startsWith('|')) continue;
+
+    // Split by |, trim cells, filter empty strings from leading/trailing |
+    const cells = trimmed.split('|').map(c => c.trim()).filter(c => c !== '');
+
+    // Require at least 6 cells with non-empty first cell
+    if (cells.length < 6 || !cells[0]) continue;
+
+    results.push({
+      id: cells[0],
+      caption: cells[1],
+      chapter: cells[2],
+      type: cells[3],
+      sourceFile: cells[4],
+      status: cells[5],
+    });
+  }
+
+  return results;
+}
+
+/**
+ * Append a figure entry row to FIGURES.md content.
+ * @param {string} content - FIGURES.md content
+ * @param {{ id: string, caption: string, chapter: string, type: string, sourceFile: string, status: string }} entry
+ * @returns {string} Modified content
+ */
+function appendFigureEntry(content, entry) {
+  const newRow = '| ' + entry.id + ' | ' + entry.caption + ' | ' + entry.chapter + ' | ' + entry.type + ' | ' + entry.sourceFile + ' | ' + entry.status + ' |';
+
+  // Check for empty placeholder row
+  const emptyRowRe = /(\| *\| *\| *\| *\| *\| *\|)/;
+  if (emptyRowRe.test(content)) {
+    // Replace the FIRST empty row
+    return content.replace(emptyRowRe, newRow);
+  }
+
+  // Find ## Tables section and insert before it
+  const tablesIdx = content.indexOf('## Tables');
+  if (tablesIdx !== -1) {
+    return content.slice(0, tablesIdx) + newRow + '\n\n' + content.slice(tablesIdx);
+  }
+
+  // No ## Tables section: append at end
+  if (!content.endsWith('\n')) {
+    content += '\n';
+  }
+  return content + newRow + '\n';
+}
+
+/**
+ * Extract all figure references (\ref{fig:*}, \autoref{fig:*}, \Autoref{fig:*}) from .tex content.
+ * @param {string} texContent - LaTeX source content
+ * @returns {Set<string>} Set of bare figure IDs (without fig: prefix)
+ */
+function extractFigureRefs(texContent) {
+  const refs = new Set();
+  const patterns = [
+    /\\ref\{fig:([^}]+)\}/g,
+    /\\autoref\{fig:([^}]+)\}/g,
+    /\\Autoref\{fig:([^}]+)\}/g,
+  ];
+
+  for (const pattern of patterns) {
+    let match;
+    while ((match = pattern.exec(texContent)) !== null) {
+      refs.add(match[1]);
+    }
+  }
+
+  return refs;
+}
+
+/**
+ * Extract all figure labels (\label{fig:*}) from .tex content.
+ * @param {string} texContent - LaTeX source content
+ * @returns {Set<string>} Set of bare figure IDs (without fig: prefix)
+ */
+function extractFigureLabels(texContent) {
+  const labels = new Set();
+  const pattern = /\\label\{fig:([^}]+)\}/g;
+  let match;
+  while ((match = pattern.exec(texContent)) !== null) {
+    labels.add(match[1]);
+  }
+  return labels;
+}
+
+/**
+ * Normalize a figure ID to kebab-case.
+ * @param {string} input - Raw figure ID
+ * @returns {string} Normalized kebab-case ID
+ */
+function normalizeToKebabCase(input) {
+  let result = input;
+  // Convert camelCase to kebab-case
+  result = result.replace(/([a-z])([A-Z])/g, '$1-$2');
+  // Replace underscores with hyphens
+  result = result.replace(/_/g, '-');
+  // Replace multiple consecutive hyphens with single
+  result = result.replace(/-{2,}/g, '-');
+  // Trim leading/trailing hyphens
+  result = result.replace(/^-+|-+$/g, '');
+  // Lowercase entire result
+  result = result.toLowerCase();
+  return result;
+}
+
+/**
+ * FIG-01/FIG-04: Register a figure in FIGURES.md.
+ * @param {string} cwd - Current working directory
+ * @param {string[]} args - CLI arguments
+ * @param {boolean} raw - Whether to output raw text
+ */
+function cmdRegisterFigure(cwd, args, raw) {
+  const idIdx = args.indexOf('--id');
+  const typeIdx = args.indexOf('--type');
+  const chapterIdx = args.indexOf('--chapter');
+  const captionIdx = args.indexOf('--caption');
+
+  const id = idIdx !== -1 ? args[idIdx + 1] : null;
+  const type = typeIdx !== -1 ? args[typeIdx + 1] : null;
+  const chapter = chapterIdx !== -1 ? args[chapterIdx + 1] : null;
+  const caption = captionIdx !== -1 ? args[captionIdx + 1] : null;
+
+  if (!id || !type || !chapter || !caption) {
+    error('Usage: register-figure --id <id> --type <excalidraw|tikz|static> --chapter <N> --caption "<caption>"');
+  }
+
+  // Validate type
+  const validTypes = ['excalidraw', 'tikz', 'static'];
+  if (!validTypes.includes(type)) {
+    error('Invalid figure type: ' + type + '. Must be one of: ' + validTypes.join(', '));
+  }
+
+  // Normalize ID
+  const normalizedId = normalizeToKebabCase(id);
+
+  // Determine source file based on type
+  let sourceFile;
+  if (type === 'excalidraw') {
+    sourceFile = 'figures/' + normalizedId + '.excalidraw';
+  } else if (type === 'tikz') {
+    sourceFile = 'figures/' + normalizedId + '.tikz';
+  } else {
+    sourceFile = 'figures/' + normalizedId + '.png';
+  }
+
+  const status = 'planned';
+
+  // Read FIGURES.md
+  const figuresPath = path.join(cwd, '.planning', 'FIGURES.md');
+  const content = safeReadFile(figuresPath);
+  if (content === null) {
+    error('FIGURES.md not found at ' + figuresPath + '. Run /gtd:new-thesis first.');
+  }
+
+  // Check for duplicate ID
+  const existing = parseFiguresCatalog(content);
+  if (existing.some(fig => fig.id === normalizedId)) {
+    error('Figure ID already exists: ' + normalizedId);
+  }
+
+  const entry = {
+    id: normalizedId,
+    caption,
+    chapter,
+    type,
+    sourceFile,
+    status,
+  };
+
+  const updated = appendFigureEntry(content, entry);
+  fs.writeFileSync(figuresPath, updated, 'utf-8');
+
+  output({
+    id: normalizedId,
+    caption,
+    chapter,
+    type,
+    sourceFile,
+    status: 'planned',
+    catalogPath: '.planning/FIGURES.md',
+  }, raw, 'Registered figure \'' + normalizedId + '\' (type: ' + type + ') in FIGURES.md for chapter ' + chapter);
+}
+
+/**
+ * FIG-05: Cross-reference validation for figures.
+ * Scans both src/chapters/ and .planning/chapters/ for figure refs/labels,
+ * cross-checks against FIGURES.md catalog.
+ * @param {string} cwd - Current working directory
+ * @param {boolean} raw - Whether to output raw text
+ */
+function cmdValidateFigs(cwd, raw) {
+  const figuresPath = path.join(cwd, '.planning', 'FIGURES.md');
+  const content = safeReadFile(figuresPath);
+  if (!content) error('FIGURES.md not found at ' + figuresPath);
+
+  const catalog = parseFiguresCatalog(content);
+  const catalogIds = new Set(catalog.map(fig => fig.id));
+  const allReferencedIds = new Set();
+  const allLabeledIds = new Set();
+  const perChapter = [];
+
+  // Helper to scan a directory of .tex files (same pattern as cmdValidateRefs)
+  function scanTexDir(dirPath, source) {
+    let entries;
+    try {
+      entries = fs.readdirSync(dirPath, { withFileTypes: true });
+    } catch {
+      return;
+    }
+
+    if (source === 'approved') {
+      for (const entry of entries) {
+        if (!entry.isFile() || !entry.name.endsWith('.tex')) continue;
+        const texPath = path.join(dirPath, entry.name);
+        const texContent = fs.readFileSync(texPath, 'utf-8');
+        const refs = extractFigureRefs(texContent);
+        const labels = extractFigureLabels(texContent);
+        refs.forEach(r => allReferencedIds.add(r));
+        labels.forEach(l => allLabeledIds.add(l));
+        perChapter.push({
+          file: entry.name,
+          source,
+          refs: [...refs],
+          labels: [...labels],
+        });
+      }
+    } else {
+      for (const entry of entries) {
+        if (!entry.isDirectory()) continue;
+        const chapterDirPath = path.join(dirPath, entry.name);
+        let chapterFiles;
+        try {
+          chapterFiles = fs.readdirSync(chapterDirPath);
+        } catch {
+          continue;
+        }
+
+        const draftFiles = chapterFiles
+          .filter(f => f.match(/DRAFT.*\.tex$/i))
+          .sort((a, b) => {
+            const aRev = a.match(/-r(\d+)\.tex$/i);
+            const bRev = b.match(/-r(\d+)\.tex$/i);
+            const aNum = aRev ? parseInt(aRev[1]) : 0;
+            const bNum = bRev ? parseInt(bRev[1]) : 0;
+            return bNum - aNum;
+          });
+
+        if (draftFiles.length === 0) continue;
+
+        const latestDraft = draftFiles[0];
+        const texPath = path.join(chapterDirPath, latestDraft);
+        const texContent = fs.readFileSync(texPath, 'utf-8');
+        const refs = extractFigureRefs(texContent);
+        const labels = extractFigureLabels(texContent);
+        refs.forEach(r => allReferencedIds.add(r));
+        labels.forEach(l => allLabeledIds.add(l));
+        perChapter.push({
+          file: entry.name + '/' + latestDraft,
+          source,
+          refs: [...refs],
+          labels: [...labels],
+        });
+      }
+    }
+  }
+
+  scanTexDir(path.join(cwd, 'src', 'chapters'), 'approved');
+  scanTexDir(path.join(cwd, '.planning', 'chapters'), 'draft');
+
+  // Calculate diagnostics
+  const missingFromCatalog = [];
+  for (const refId of allReferencedIds) {
+    if (!catalogIds.has(refId)) {
+      missingFromCatalog.push(refId);
+    }
+  }
+
+  const unreferencedInCatalog = [];
+  for (const fig of catalog) {
+    if (!allReferencedIds.has(fig.id)) {
+      unreferencedInCatalog.push(fig.id);
+    }
+  }
+
+  const labeledButNotInCatalog = [];
+  for (const labelId of allLabeledIds) {
+    if (!catalogIds.has(labelId)) {
+      labeledButNotInCatalog.push(labelId);
+    }
+  }
+
+  const resultData = {
+    total_catalog_entries: catalog.length,
+    total_referenced: allReferencedIds.size,
+    total_labeled: allLabeledIds.size,
+    missing_from_catalog: missingFromCatalog,
+    unreferenced_in_catalog: unreferencedInCatalog,
+    labeled_but_not_in_catalog: labeledButNotInCatalog,
+    per_chapter: perChapter,
+  };
+
+  // Build raw output
+  const lines = [];
+  lines.push('Figure Validation Report');
+  lines.push('=======================');
+  lines.push('');
+  lines.push('Catalog entries:  ' + catalog.length);
+  lines.push('Referenced (\\ref): ' + allReferencedIds.size);
+  lines.push('Labeled (\\label):  ' + allLabeledIds.size);
+  lines.push('');
+
+  if (perChapter.length > 0) {
+    lines.push('Per-chapter breakdown:');
+    for (const ch of perChapter) {
+      lines.push('  ' + ch.file + ' (' + ch.source + '): ' + ch.refs.length + ' refs, ' + ch.labels.length + ' labels');
+    }
+  } else {
+    lines.push('No chapters found to scan.');
+  }
+
+  lines.push('');
+
+  if (missingFromCatalog.length > 0) {
+    lines.push('Referenced but missing from catalog (' + missingFromCatalog.length + '): ' + missingFromCatalog.join(', '));
+  } else {
+    lines.push('All referenced figures found in catalog.');
+  }
+
+  if (unreferencedInCatalog.length > 0) {
+    lines.push('In catalog but unreferenced (' + unreferencedInCatalog.length + '): ' + unreferencedInCatalog.join(', '));
+  } else {
+    lines.push('All catalog figures are referenced.');
+  }
+
+  if (labeledButNotInCatalog.length > 0) {
+    lines.push('Labeled but not in catalog (' + labeledButNotInCatalog.length + '): ' + labeledButNotInCatalog.join(', '));
+  } else {
+    lines.push('All labeled figures are in catalog.');
+  }
+
+  output(resultData, raw, lines.join('\n'));
 }
 
 // --- Framework Update --------------------------------------------------------
@@ -1774,7 +2241,7 @@ async function main() {
   const cwd = process.cwd();
 
   if (!command) {
-    error('Usage: gtd-tools <command> [args] [--raw]\nCommands: init, progress, context, compile, cite-keys, sanitize, validate-citations, summary, framework, import-bib, fetch-doi, pdf-meta, validate-refs, pdf-refs');
+    error('Usage: gtd-tools <command> [args] [--raw]\nCommands: init, progress, context, compile, cite-keys, sanitize, validate-citations, summary, framework, import-bib, fetch-doi, pdf-meta, validate-refs, pdf-refs, register-figure, validate-figs');
   }
 
   switch (command) {
@@ -1871,8 +2338,18 @@ async function main() {
       break;
     }
 
+    case 'register-figure': {
+      cmdRegisterFigure(cwd, args, raw);
+      break;
+    }
+
+    case 'validate-figs': {
+      cmdValidateFigs(cwd, raw);
+      break;
+    }
+
     default: {
-      error('Unknown command: ' + command + '\nUsage: gtd-tools <command> [args] [--raw]\nCommands: init, progress, context, compile, cite-keys, sanitize, validate-citations, summary, framework, import-bib, fetch-doi, pdf-meta, validate-refs, pdf-refs');
+      error('Unknown command: ' + command + '\nUsage: gtd-tools <command> [args] [--raw]\nCommands: init, progress, context, compile, cite-keys, sanitize, validate-citations, summary, framework, import-bib, fetch-doi, pdf-meta, validate-refs, pdf-refs, register-figure, validate-figs');
     }
   }
 }
