@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-last_updated: "2026-03-13T23:54:50Z"
+last_updated: "2026-03-14T00:00:43Z"
 progress:
   total_phases: 5
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 10
-  completed_plans: 9
+  completed_plans: 10
 ---
 
 # Project State: Get Thesis Done (GTD)
@@ -16,28 +16,28 @@ progress:
 ## Project Reference
 
 **Core Value:** Academic rigor and consistency throughout the entire thesis -- every chapter coherent with the theoretical framework, every citation validated, formatting norms enforced automatically.
-**Current Focus:** Phase 4 executing (Reference Management). Plan 01 complete, Plan 02 next.
+**Current Focus:** Phase 4 complete (Reference Management). Phase 5 (Figure Management) is next.
 
 ## Current Position
 
 **Milestone:** v1
-**Phase:** 4 - Reference Management
-**Plan:** 2 of 2
-**Status:** Executing (Plan 01 complete)
+**Phase:** 5 - Figure Management
+**Plan:** 1 of ?
+**Status:** Phase 4 complete, Phase 5 not started
 
 ```
-[###--] 60% (3/5 phases complete)
-Phase 4: [##--] 1/2 plans complete
+[####-] 80% (4/5 phases complete)
+Phase 5: [----] 0/? plans complete
 ```
 
 ## Performance Metrics
 
 | Metric | Value |
 |--------|-------|
-| Phases complete | 3/5 |
-| Plans complete | 9/10 |
-| Requirements done | 32/43 |
-| Session count | 8 |
+| Phases complete | 4/5 |
+| Plans complete | 10/10 |
+| Requirements done | 35/43 |
+| Session count | 9 |
 
 | Phase | Plan | Duration | Tasks | Files |
 |-------|------|----------|-------|-------|
@@ -50,6 +50,7 @@ Phase 4: [##--] 1/2 plans complete
 | 03 | 01 | 9m 39s | 2 | 3 |
 | 03 | 02 | 6m 37s | 2 | 4 |
 | 04 | 01 | 4m 44s | 2 | 2 |
+| 04 | 02 | 2m 18s | 2 | 2 |
 
 ## Accumulated Context
 
@@ -102,6 +103,9 @@ Phase 4: [##--] 1/2 plans complete
 - pdf-meta graceful degradation chain: pdfinfo -> pdftotext -> Crossref fetch -> minimal entry fallback (04-01)
 - validate-refs picks latest DRAFT revision per chapter directory (DRAFT-r2 > DRAFT-r1 > DRAFT) (04-01)
 - constructMinimalBibEntry generates unique keys via author-year + filename-hash fallback to avoid collisions (04-01)
+- Workflow does not spawn reference-manager agent for simple operations -- CLI output is sufficient (04-02)
+- One source per /gtd:add-reference invocation; batch via repeated calls, not batch mode (04-02)
+- Post-import validation (validate-refs + pdf-refs) runs automatically after every successful import/fetch/extract (04-02)
 
 ### Research Flags
 - Phase 5 (Figure Pipeline): Excalidraw export tooling at MEDIUM confidence -- validate excalidraw-brute-export-cli reliability on WSL2/Linux before building around it
@@ -122,14 +126,14 @@ Phase 4: [##--] 1/2 plans complete
 ## Session Continuity
 
 ### Last Session
-- **Date:** 2026-03-13
-- **What happened:** Executed Phase 4 Plan 01 (CLI Extensions + Reference-Manager Agent). Added 5 new CLI commands (import-bib, fetch-doi, pdf-meta, validate-refs, pdf-refs) to gtd-tools.js, converted main() to async, created reference-manager agent. All verification passed.
-- **Where we stopped:** Completed 04-01-PLAN.md. Plan 02 (add-reference workflow + command) is next.
+- **Date:** 2026-03-14
+- **What happened:** Executed Phase 4 Plan 02 (Add-Reference Workflow + Command). Created add-reference.md workflow (341 lines) with multi-mode auto-detection (.bib/DOI/PDF), CLI delegation, and post-import validation. Created /gtd:add-reference command definition. All verification passed. Phase 4 complete.
+- **Where we stopped:** Completed 04-02-PLAN.md. Phase 4 (Reference Management) is fully done. Phase 5 (Figure Management) is next.
 
 ### Next Session
-- Start with: Phase 4 Plan 02 execution
-- Context to load: 04-02-PLAN.md
+- Start with: Phase 5 planning
+- Context to load: Phase 5 research/planning
 
 ---
 *State initialized: 2026-03-13*
-*Last updated: 2026-03-13 after Phase 4 Plan 01 execution*
+*Last updated: 2026-03-14 after Phase 4 Plan 02 execution*

@@ -10,7 +10,7 @@
 - [x] **Phase 1: Foundation & Initialization** - Installable package that scaffolds a compilable, empty ABNT-compliant LaTeX thesis with canonical documents
 - [x] **Phase 2: Writing Pipeline & Compilation** - Plan chapters, generate LaTeX drafts in two waves, and compile to PDF
 - [x] **Phase 3: Academic Review & Continuity** - Adversarial 4-category review with continuity loop for cross-chapter coherence
-- [ ] **Phase 4: Reference Management** - Import, fetch, and validate references from .bib, DOI, and PDF sources
+- [x] **Phase 4: Reference Management** - Import, fetch, and validate references from .bib, DOI, and PDF sources
 - [ ] **Phase 5: Figure Management** - Create, catalog, and validate figures with pre-compilation export pipeline
 
 ## Phase Details
@@ -74,7 +74,7 @@ Plans:
 **Plans:** 2 plans
 Plans:
 - [x] 04-01-PLAN.md -- CLI extensions (import-bib, fetch-doi, pdf-meta, validate-refs, pdf-refs) and reference-manager agent
-- [ ] 04-02-PLAN.md -- add-reference workflow and /gtd:add-reference command
+- [x] 04-02-PLAN.md -- add-reference workflow and /gtd:add-reference command
 
 ### Phase 5: Figure Management
 **Goal**: Users can create, catalog, and manage thesis figures with automatic reference validation, and the compilation pipeline pre-processes figure exports before building the PDF
@@ -94,9 +94,9 @@ Plans:
 | 1. Foundation & Initialization | 3/3 | Complete | 2026-03-13 |
 | 2. Writing Pipeline & Compilation | 3/3 | Complete | 2026-03-13 |
 | 3. Academic Review & Continuity | 2/2 | Complete | 2026-03-13 |
-| 4. Reference Management | 1/2 | Executing | - |
+| 4. Reference Management | 2/2 | Complete | 2026-03-14 |
 | 5. Figure Management | 0/? | Not started | - |
 
 ---
 *Roadmap created: 2026-03-13*
-*Last updated: 2026-03-13 after Phase 4 Plan 01 execution*
+*Last updated: 2026-03-14 after Phase 4 Plan 02 execution*
