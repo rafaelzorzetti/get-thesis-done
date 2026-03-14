@@ -11,7 +11,7 @@
 - [x] **Phase 2: Writing Pipeline & Compilation** - Plan chapters, generate LaTeX drafts in two waves, and compile to PDF
 - [x] **Phase 3: Academic Review & Continuity** - Adversarial 4-category review with continuity loop for cross-chapter coherence
 - [x] **Phase 4: Reference Management** - Import, fetch, and validate references from .bib, DOI, and PDF sources
-- [ ] **Phase 5: Figure Management** - Create, catalog, and validate figures with pre-compilation export pipeline
+- [x] **Phase 5: Figure Management** - Create, catalog, and validate figures with pre-compilation export pipeline
 
 ## Phase Details
 
@@ -85,7 +85,10 @@ Plans:
   2. Excalidraw figures (.excalidraw files) are exported to PDF/PNG during the compilation pre-processing step
   3. TikZ/PGF figures compile inline within the LaTeX build without additional pre-processing
   4. All `\ref{fig:*}` in the thesis are validated against the FIGURES.md catalog -- orphaned references are flagged
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [x] 05-01-PLAN.md -- CLI extensions (register-figure, validate-figs, preProcessFigures implementation, exportExcalidraw) and figure-manager agent
+- [x] 05-02-PLAN.md -- add-figure workflow and /gtd:add-figure command
 
 ## Progress
 
@@ -95,8 +98,8 @@ Plans:
 | 2. Writing Pipeline & Compilation | 3/3 | Complete | 2026-03-13 |
 | 3. Academic Review & Continuity | 2/2 | Complete | 2026-03-13 |
 | 4. Reference Management | 2/2 | Complete | 2026-03-14 |
-| 5. Figure Management | 0/? | Not started | - |
+| 5. Figure Management | 2/2 | Complete | 2026-03-13 |
 
 ---
 *Roadmap created: 2026-03-13*
-*Last updated: 2026-03-14 after Phase 4 Plan 02 execution*
+*Last updated: 2026-03-13 after Phase 5 execution (all phases complete)*

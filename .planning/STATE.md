@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: planning
-last_updated: "2026-03-14T00:06:59.654Z"
+status: complete
+last_updated: "2026-03-13T00:00:00.000Z"
 progress:
   total_phases: 5
-  completed_phases: 4
-  total_plans: 10
-  completed_plans: 10
+  completed_phases: 5
+  total_plans: 12
+  completed_plans: 12
 ---
 
 # Project State: Get Thesis Done (GTD)
@@ -16,28 +16,28 @@ progress:
 ## Project Reference
 
 **Core Value:** Academic rigor and consistency throughout the entire thesis -- every chapter coherent with the theoretical framework, every citation validated, formatting norms enforced automatically.
-**Current Focus:** Phase 4 complete (Reference Management). Phase 5 (Figure Management) is next.
+**Current Focus:** All 5 phases complete. Milestone v1 finished.
 
 ## Current Position
 
 **Milestone:** v1
-**Phase:** 5 - Figure Management
-**Plan:** 1 of ?
-**Status:** Ready to plan
+**Phase:** 5 - Figure Management (COMPLETE)
+**Plan:** 2 of 2 (COMPLETE)
+**Status:** All phases executed
 
 ```
-[####-] 80% (4/5 phases complete)
-Phase 5: [----] 0/? plans complete
+[#####] 100% (5/5 phases complete)
+Phase 5: [##] 2/2 plans complete
 ```
 
 ## Performance Metrics
 
 | Metric | Value |
 |--------|-------|
-| Phases complete | 4/5 |
-| Plans complete | 10/10 |
-| Requirements done | 35/43 |
-| Session count | 9 |
+| Phases complete | 5/5 |
+| Plans complete | 12/12 |
+| Requirements done | 43/43 |
+| Session count | 10 |
 
 | Phase | Plan | Duration | Tasks | Files |
 |-------|------|----------|-------|-------|
@@ -51,6 +51,8 @@ Phase 5: [----] 0/? plans complete
 | 03 | 02 | 6m 37s | 2 | 4 |
 | 04 | 01 | 4m 44s | 2 | 2 |
 | 04 | 02 | 2m 18s | 2 | 2 |
+| 05 | 01 | ~3m | 2 | 3 |
+| 05 | 02 | ~1m | 2 | 2 |
 
 ## Accumulated Context
 
@@ -85,7 +87,7 @@ Phase 5: [----] 0/? plans complete
 - Protected-zone placeholder approach for LaTeX sanitization: null-byte markers preserve command/math/comment zones during prose escaping (02-03)
 - Single biblatex regex covers all citation variants (cite, textcite, autocite, parencite, footcite, cites, starred, optional args) (02-03)
 - SUMMARY.md template is write-once (never overwrites existing) to protect human edits (02-03)
-- preProcessFigures() no-op hook in compile pipeline reserves slot for Phase 5 figure exports (02-03)
+- preProcessFigures() implemented with Excalidraw export pipeline (excalirender + excalidraw-to-svg/rsvg-convert fallback) (02-03 hook, 05-01 implementation)
 - Reviewer uses 4 thesis review categories replacing GWD's 6 book categories: citation_validity, methodological_rigor, argumentative_coherence, formatting_norms (03-01)
 - Framework-keeper has 7 extraction steps adding Methodological Commitments (new) and removing Metaphors/Symbols and Recurring Elements (book-specific) (03-01)
 - Summary-writer fills 7 thesis sections matching gtd-tools.js summary template, removing Metaphors Active and Emotional Arc (03-01)
@@ -106,9 +108,18 @@ Phase 5: [----] 0/? plans complete
 - Workflow does not spawn reference-manager agent for simple operations -- CLI output is sufficient (04-02)
 - One source per /gtd:add-reference invocation; batch via repeated calls, not batch mode (04-02)
 - Post-import validation (validate-refs + pdf-refs) runs automatically after every successful import/fetch/extract (04-02)
+- exportExcalidraw tries excalirender first, falls back to excalidraw-to-svg + rsvg-convert (05-01)
+- parseFiguresCatalog parses FIGURES.md Figures table between ## Figures and ## Tables (05-01)
+- appendFigureEntry replaces first empty placeholder row or inserts before ## Tables (05-01)
+- normalizeToKebabCase enforces kebab-case for all figure IDs (05-01)
+- validate-figs scans both src/chapters/ and .planning/chapters/ for \ref{fig:*} cross-referencing against FIGURES.md (05-01)
+- register-figure validates type (excalidraw|tikz|static), rejects duplicates, normalizes IDs (05-01)
+- main.tex template includes \usepackage{tikz} and \graphicspath{{figures/}{figures/exports/}} (05-01)
+- Workflow does not spawn figure-manager agent for simple registrations -- workflow handles complete flow directly (05-02)
+- One figure per /gtd:add-figure invocation; batch via repeated calls (05-02)
+- Post-registration validation (validate-figs) runs automatically after every figure registration (05-02)
 
 ### Research Flags
-- Phase 5 (Figure Pipeline): Excalidraw export tooling at MEDIUM confidence -- validate excalidraw-brute-export-cli reliability on WSL2/Linux before building around it
 - Phase 3 (Review schemas): Inter-agent communication format (PLAN.md, REVIEW.md) should be designed carefully during planning
 - abnTeX2 + biblatex compatibility: Verify chosen template works with biber+biblatex during Phase 1
 
@@ -126,14 +137,14 @@ Phase 5: [----] 0/? plans complete
 ## Session Continuity
 
 ### Last Session
-- **Date:** 2026-03-14
-- **What happened:** Executed Phase 4 Plan 02 (Add-Reference Workflow + Command). Created add-reference.md workflow (341 lines) with multi-mode auto-detection (.bib/DOI/PDF), CLI delegation, and post-import validation. Created /gtd:add-reference command definition. All verification passed. Phase 4 complete.
-- **Where we stopped:** Completed 04-02-PLAN.md. Phase 4 (Reference Management) is fully done. Phase 5 (Figure Management) is next.
+- **Date:** 2026-03-13
+- **What happened:** Executed Phase 5 (Figure Management). Wave 1: added 6 helper functions + 2 CLI commands (register-figure, validate-figs) + implemented preProcessFigures with Excalidraw export pipeline + updated main.tex template + created figure-manager agent. Wave 2: created add-figure workflow and /gtd:add-figure command. All 5 phases complete, milestone v1 finished.
+- **Where we stopped:** All phases executed. Milestone v1 is complete with 43/43 requirements covered.
 
 ### Next Session
-- Start with: Phase 5 planning
-- Context to load: Phase 5 research/planning
+- Start with: `/gsd:verify-work` or milestone completion
+- Context to load: Full project for verification
 
 ---
 *State initialized: 2026-03-13*
-*Last updated: 2026-03-14 after Phase 4 Plan 02 execution*
+*Last updated: 2026-03-13 after Phase 5 execution*
