@@ -82,18 +82,29 @@ gtd-tools.js validate-figs                 # Cross-reference figures vs FIGURES.
 - **Claude Code** (or compatible AI coding assistant)
 - **LaTeX** — texlive with abntex2, biblatex-abnt, biber
 
-```bash
-# Ubuntu/Debian
-sudo apt-get install texlive-latex-extra texlive-publishers texlive-lang-portuguese texlive-bibtex-extra biber texlive-fonts-extra
-```
-
 ## Installation
 
 ```bash
+# 1. Clone the repository
 git clone https://github.com/rafaelzorzetti/get-thesis-done.git ~/.claude/get-thesis-done
+
+# 2. Link the /gtd:* commands so Claude Code can find them
+mkdir -p ~/.claude/commands
+ln -s ~/.claude/get-thesis-done/commands/gtd ~/.claude/commands/gtd
 ```
 
-The `/gtd:*` commands become available automatically in Claude Code when working in any directory.
+The `/gtd:*` commands become available globally in Claude Code after linking.
+
+### LaTeX dependencies
+
+```bash
+# Ubuntu/Debian
+sudo apt-get install texlive-latex-extra texlive-publishers \
+  texlive-lang-portuguese texlive-bibtex-extra biber texlive-fonts-extra
+
+# macOS
+brew install --cask mactex
+```
 
 ## Quick Start
 
