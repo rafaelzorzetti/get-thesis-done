@@ -133,6 +133,10 @@ brew install --cask mactex
 | en | APA | abnTeX2 (configurable) |
 | es | APA | abnTeX2 (configurable) |
 
+## Credits
+
+Built on top of [Get Shit Done (GSD)](https://github.com/rafaelzorzetti/get-shit-done) — a project management framework for Claude Code that handles phase planning, execution, and verification. GSD was used to plan and build GTD itself (5 phases, 12 plans, 43 requirements).
+
 ## License
 
 MIT
