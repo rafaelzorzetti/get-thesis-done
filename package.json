@@ -2,11 +2,7 @@
   "name": "get-thesis-done",
   "version": "1.16.0",
   "description": "A complete thesis-writing pipeline powered by multi-agent AI — canonical short context, adversarial academic review, and progressive summaries keep every chapter consistent.",
-  "bin": {
-    "get-thesis-done": "bin/install.js"
-  },
   "files": [
-    "bin",
     "commands",
     "get-thesis-done",
     "agents"
@@ -20,9 +16,7 @@
     "multi-agent",
     "claude",
     "claude-code",
-    "writing-pipeline",
-    "gemini",
-    "gemini-cli"
+    "writing-pipeline"
   ],
   "author": "TACHES",
   "license": "MIT",
@@ -38,12 +32,8 @@
     "node": ">=18.0.0"
   },
   "dependencies": {},
-  "devDependencies": {
-    "esbuild": "^0.24.0"
-  },
+  "devDependencies": {},
   "scripts": {
-    "build:hooks": "node scripts/build-hooks.js",
-    "prepublishOnly": "npm run build:hooks",
     "test": "node --test get-thesis-done/bin/gtd-tools.test.js"
   }
 }
